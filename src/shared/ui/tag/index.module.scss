@@ -1,0 +1,24 @@
+.tag {
+  padding: 5px 10px;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  height: max-content;
+
+  &.info {
+    background-color: #EFF5FF;
+    color: #316CFE;
+  }
+
+  &.success {
+    background-color: #EFFFF4;
+    color: #0FAE19;
+  }
+
+  &.danger {
+    background-color: #FFEFEF;
+    color: #F41F1F;
+  }
+}

@@ -1,0 +1,43 @@
+.dateTimePicker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  cursor: text;
+
+  label {
+    color: #1e1e1e;
+  }
+
+  .root {
+    background-color: transparent;
+    height: 50px;
+    border: 1px solid #d9d9d9;
+    padding: 0 17px 0 0;
+
+    input {
+      height: 100%;
+      color: #1e1e1e;
+      background-color: #fff;
+      padding: 12px 16px;
+      border-radius: 8px;
+
+      font-size: 16px;
+
+      &:focus {
+        outline: none;
+
+      }
+    }
+
+    &:has(input:focus) {
+      box-shadow: none;
+      border: 1px solid #ff5700;
+    }
+
+    > span:last-child svg {
+      width: 23px;
+      height: 23px;
+    }
+  }
+}

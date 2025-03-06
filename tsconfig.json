@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"]
+        },
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "jsx": "preserve",
+        "outDir": "./dist",
+        "target": "ES2017",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "moduleResolution": "bundler",
+        "module": "esnext",
+        "strict": true,
+        "noEmit": true,
+        "isolatedModules": true,
+        "incremental": true
+    },
+    "include": ["src"],
+    "exclude": ["node_modules"]
+}

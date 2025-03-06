@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', serif;
+    font-weight: 400;
+    font-style: normal;
+    background-color: #f7faff;
+}
+
+button {
+    cursor: pointer;
+}
+
+.container {
+    width: calc(100% - 120px);
+    margin: 0 auto;
+    max-width: none;
+}
+
+h1 {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 57px;
+}
+
+h2 {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 28px;
+}
+
+h3 {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 22px;
+}
