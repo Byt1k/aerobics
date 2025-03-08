@@ -90,12 +90,12 @@ interface Props {
     onChange?: (value: string) => void
     locked?: boolean
     className?: string
-    options: OptionType[]
+    options: SelectOptionType[]
     name?: string
     disabled?: boolean
 }
 
-interface OptionType {
+export interface SelectOptionType {
     value: string
     label: string
 }

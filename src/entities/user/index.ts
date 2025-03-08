@@ -5,5 +5,6 @@ export { getRoles } from './actions/get-roles'
 
 export { UserEditorPopup } from './ui/editor-popup'
 
-export type { UserType, UserRole } from './model/types'
+export type { UserType, UserRole, UserRoleId, UserRoleTitle, UserByCompetition } from './model/types'
+export { userRolesList } from './model/types'
 export { UserContext } from './model/user-context'
