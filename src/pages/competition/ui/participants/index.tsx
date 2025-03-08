@@ -29,11 +29,15 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
                 })
 
                 for (const queue of uniqQueues) {
-                    result[queue] = []
+                    result[queue] = {}
+
+                    for (const nomination of uniqNominations) {
+                        result[queue][nomination] = []
+                    }
                 }
 
                 res.forEach(participant => {
-                    result[participant.queue_index].push(participant)
+                    result[participant.queue_index][participant.nomination_shortened].push(participant)
                 })
 
                 setList(res)
@@ -50,20 +54,6 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
     useEffect(() => {
         fetchParticipants()
     }, [])
-
-    const queueWithMaxParticipants = (): number => {
-        let max = 0
-        let queueResult = 0
-
-        Object.keys(tableState).forEach(queueIndex => {
-            if (tableState[+queueIndex].length > max) {
-                max = tableState[+queueIndex].length
-                queueResult = +queueIndex
-            }
-        })
-
-        return queueResult
-    }
 
     return (
         <div>
@@ -91,39 +81,42 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
                     </div>
                 )}
             </div>
-            <table className={tableStyles.table}>
-                <thead>
-                <tr>
-                        {Object.keys(tableState).map(queue => (
-                            <td key={queue} className="text-center" colSpan={4}>
-                                Бригада {queue}
-                            </td>
-                        )) }
-                    </tr>
-                </thead>
-                <tbody>
-                    {tableState[queueWithMaxParticipants()]?.map((_, participantIndex) => (
-                        <tr key={'row-' + participantIndex}>
-                            {queues.map(queue => {
-                                const participant = tableState[+queue][participantIndex]
 
-                                if (!participant) {
-                                    return <td key={participantIndex} colSpan={4} />
+            <div className="flex gap-3">
+                {queues.map(queue => (
+                    <table className={tableStyles.table} key={queue}>
+                        <thead>
+                            <tr>
+                                <td colSpan={3} className="text-center">
+                                    <h3>Бригада {queue}</h3>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {Object.entries(tableState[queue]).map(([nomination, participants]) => {
+                                if (participants.length) {
+                                    return (
+                                        <React.Fragment key={nomination}>
+                                            <tr>
+                                                <td colSpan={3} className="text-center font-bold">{nomination}</td>
+                                            </tr>
+                                            {participants.map(p => (
+                                                <tr key={p.id}>
+                                                    <td>{p.order_num}</td>
+                                                    <td className="whitespace-pre-wrap">{p.names}</td>
+                                                    <td>{`${p.country}, ${p.city}`}</td>
+                                                </tr>
+                                            ))}
+                                        </React.Fragment>
+                                    )
                                 }
 
-                                return (
-                                    <React.Fragment key={participantIndex}>
-                                        <td>{participant.order_num}</td>
-                                        <td className="whitespace-pre-wrap">{participant.names}</td>
-                                        <td className="whitespace-nowrap">{participant.nomination_shortened}</td>
-                                        <td>{`${participant.country}, ${participant.city}`}</td>
-                                    </React.Fragment>
-                                )
+                                return null
                             })}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+                )) }
+            </div>
         </div>
     )
 }
@@ -134,4 +127,5 @@ interface Props {
     competition: Competition
 }
 
-type ParticipantsTable = Record<number, Participant[]>
+type ParticipantsTable = Record<number, ParticipantsQueue>
+type ParticipantsQueue = Record<string, Participant[]>
