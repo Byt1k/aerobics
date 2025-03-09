@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { getRoles, getUsersList, UserRole, UserType, UserByCompetition, userRolesList, UserRoleId } from '@/entities/user'
 import { Competition, getUsersByCompetition, setUserToCompetition, unsetUserByCompetition } from '@/entities/competition'
 import s from './index.module.scss'
@@ -8,28 +8,23 @@ import { svgIcons } from '@/shared/lib/svgIcons'
 import { toast } from 'react-toastify'
 
 const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }) => {
-    const initState = useMemo(() => {
-        const res: State = {}
-
-        for (let q = 1; q <= competition.queues_amount; q++) {
-            res[q] = []
-        }
-        return res
-    }, [competition])
-
     const [allUsers, setAllUsers] = useState<UserType[]>([])
     const [usersByCompetitionList, setUsersByCompetitionList] = useState<UserByCompetition[]>([])
     const [roles, setRoles] = useState<UserRole[]>([])
 
     const [mainRefereeUserId, setMainRefereeUserId] = useState<number | null>(null)
-    const [state, setState] = useState(initState)
+    const [state, setState] = useState<State>({})
 
     const fetchUsersByCompetition = async () => {
         try {
             const res = await getUsersByCompetition(competition.id)
 
             if (res.length) {
-                const result = { ...initState }
+                const result: State = {}
+
+                for (let q = 1; q <= competition.queues_amount; q++) {
+                    result[q] = []
+                }
 
                 for (const user of res) {
                     if (user.role.id === userRolesList['главный судья']) {
@@ -47,6 +42,8 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                     }
                 }
 
+                console.log('result', result)
+
                 setState(result)
             }
             setUsersByCompetitionList(res)
@@ -54,6 +51,8 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
             console.log(e)
         }
     }
+
+    console.log('state', state)
 
     useEffect(() => {
         getRoles()
@@ -141,8 +140,6 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
             toast.error('Что-то пошло нет так')
         }
     }
-
-    console.log(state)
 
     return (
         <div className="flex flex-col gap-5">
