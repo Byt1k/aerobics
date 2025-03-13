@@ -1,0 +1,21 @@
+.deductionsTable {
+  width: 100%;
+
+  td {
+    background-color: #fff;
+    border: 1px solid #0000000D;
+    line-height: normal;
+    font-weight: 600;
+    padding: 15px 10px;
+
+
+    &:not(:first-child) {
+      text-align: center;
+    }
+
+    input {
+      font-size: 21px;
+      text-align: center;
+    }
+  }
+}

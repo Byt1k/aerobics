@@ -7,9 +7,12 @@ export { getParticipantsList } from './actions/get-participants-list'
 export { getUsersByCompetition } from './actions/get-users-by-competition'
 export { setUserToCompetition } from './actions/set-user-to-competition'
 export { unsetUserByCompetition } from './actions/unset-user-by-competition'
+export { getUserRoleAndQueue } from './actions/get-user-role-and-queue'
+export type { UserRoleAndQueueByCompetition } from './actions/get-user-role-and-queue'
 
 export { CompetitionEditorPopup } from './ui/editor-popup'
 export { UploadParticipantsInput } from './ui/upload-participants-input'
+export { CompetitionRatesTable } from './ui/competition-rates-table'
 
 export type { Competition, Participant } from './model/types'
 export { competitionStatuses } from './model/types'

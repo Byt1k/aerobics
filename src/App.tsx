@@ -27,7 +27,7 @@ function App() {
 
     return (
         <>
-            <UserContext.Provider value={{ user, setUser }}>
+            <UserContext.Provider value={user}>
                 <Routes>
                     <Route path="/" element={<RootLayout />}>
                         <Route path={routes.users()} element={<UsersPage />} />

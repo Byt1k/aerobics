@@ -1,8 +1,7 @@
 import { FormState } from '../ui'
 import { axiosInstance, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from '@/kernel/instance'
-import { startPage } from '@/kernel/routes'
+import { routes } from '@/kernel/routes'
 import Cookies from 'js-cookie'
-import { useNavigate } from 'react-router-dom'
 
 export const signInAction = async (
     _: FormState,
@@ -32,13 +31,14 @@ export const signInAction = async (
         Cookies.set(ACCESS_TOKEN_KEY, access_token, { path: '/' })
         Cookies.set(REFRESH_TOKEN_KEY, refresh_token, { path: '/' })
 
-        window.location.pathname = startPage()
+        window.location.pathname = routes.competitionsList()
 
         return {
             username: '',
             password: '',
             error: null,
         }
+    // eslint-disable-next-line
     } catch (e: any) {
         return {
             username: data.username,

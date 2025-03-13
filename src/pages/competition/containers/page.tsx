@@ -1,51 +1,47 @@
-import React, { useLayoutEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getCompetition, Competition, competitionStatuses } from '@/entities/competition'
 import Tag, { TagProps } from '@/shared/ui/tag'
 import { formatDate } from '@/shared/lib/formatDate'
-import { Breadcrumb, Tabs, TabsProps } from 'antd'
+import { Breadcrumb } from 'antd'
 import { routes } from '@/kernel/routes'
-import RefereeingTeams from '../ui/refereeing-teams'
-import CompetitionParticipants from '../ui/participants'
+import { AdminContent } from './admin-content'
+import { RateInputField } from '../ui/rate-input-field'
+import { useCurrentUser, userRolesList } from '@/entities/user'
+import { getUserRoleAndQueue, UserRoleAndQueueByCompetition } from '@/entities/competition'
+import { ArbitratorModule } from '../ui/arbitrator-module'
+import Ratings from '../ui/ratings'
 
 export const CompetitionPage = () => {
-    const { id } = useParams<{ id: string }>()
+    const { id } = useParams()
+    const currentUser = useCurrentUser()
     const [competition, setCompetition] = useState<Competition | null>(null)
+    const [isPending, setIsPending] = useState(true)
 
-    useLayoutEffect(() => {
-        getCompetition(id!)
+    const [refereeRoleAndQueue, setRefereeRoleAndQueue] = useState<UserRoleAndQueueByCompetition | null>(null)
+
+    useEffect(() => {
+        if (!id) return
+
+        setIsPending(true)
+        getCompetition(id)
             .then(res => setCompetition(res))
             .catch(() => setCompetition(null))
+            .finally(() => setIsPending(false))
+
+        if (currentUser.is_admin) return
+
+        getUserRoleAndQueue(id)
+            .then(res => setRefereeRoleAndQueue(res))
+            .catch(() => setRefereeRoleAndQueue(null))
     }, [id])
 
-    const items: TabsProps['items'] = useMemo(() => {
-        if (!competition) return []
-
-        return [
-            {
-                key: '1',
-                label: 'Судьи',
-                children: <RefereeingTeams competition={competition} />,
-            },
-            {
-                key: '2',
-                label: 'Стартовый протокол',
-                children: <CompetitionParticipants competition={competition} />,
-            },
-            {
-                key: '3',
-                label: 'Оценки',
-                children: 'Таблица оценок',
-            },
-        ]
-    }, [competition])
+    if (!competition && isPending) {
+        return <div>Загрузка...</div>
+    }
 
     if (!competition) {
-        return (
-            <div>
-                Соревнование не найдено
-            </div>
-        )
+        return <div>Соревнование не найдено</div>
     }
 
     return (
@@ -74,8 +70,31 @@ export const CompetitionPage = () => {
                 <p>Дата начала: {formatDate(competition.date_start)}</p>
             </div>
 
-            <Tabs defaultActiveKey="1"  items={items} />
+            {currentUser.is_admin && <AdminContent competition={competition} />}
 
+            {[
+                userRolesList['исполнение судья'],
+                userRolesList['элемент судья'],
+                userRolesList['сложность судья'],
+                // eslint-disable-next-line
+                // @ts-ignore
+            ].includes(refereeRoleAndQueue?.role.id) && (
+                <RateInputField
+                    competition={competition}
+                    refereeRoleAndQueue={refereeRoleAndQueue!}
+                />
+            )}
+
+            {refereeRoleAndQueue?.role.id === userRolesList['арбитр'] && (
+                <ArbitratorModule
+                    competition={competition}
+                    refereeRoleAndQueue={refereeRoleAndQueue!}
+                />
+            )}
+
+            {refereeRoleAndQueue?.role.id === userRolesList['главный судья'] && (
+                <Ratings competition={competition} />
+            )}
         </div>
     )
 }

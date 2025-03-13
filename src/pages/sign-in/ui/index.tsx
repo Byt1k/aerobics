@@ -1,10 +1,10 @@
-import { use, useActionState } from 'react'
+import { useActionState } from 'react'
 import s from './index.module.scss'
 import Input from '@/shared/ui/input'
 import Button from '@/shared/ui/button'
 import { signInAction } from '../actions/sign-in'
-import { UserContext } from '@/entities/user'
-import { startPage } from '@/kernel/routes'
+import { useCurrentUser } from '@/entities/user'
+import { routes } from '@/kernel/routes'
 import { Navigate } from 'react-router-dom'
 
 export interface FormState {
@@ -14,7 +14,7 @@ export interface FormState {
 }
 
 export const SignInPage = () => {
-    const { user } = use(UserContext)
+    const user = useCurrentUser()
 
     const initialState: FormState = {
         username: '',
@@ -28,7 +28,7 @@ export const SignInPage = () => {
     )
 
     if (user) {
-        return <Navigate to={startPage()} />
+        return <Navigate to={routes.competitionsList()} />
     }
 
 

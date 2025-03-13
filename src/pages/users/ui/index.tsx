@@ -1,12 +1,12 @@
-import React, { use, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Button from '@/shared/ui/button'
 import Table, { TableColumns } from '@/shared/ui/table'
 import s from './index.module.scss'
-import { UserType, UserContext, UserEditorPopup,  deleteUserAction, getUsersList } from '@/entities/user'
+import { UserType, useCurrentUser, UserEditorPopup,  deleteUserAction, getUsersList } from '@/entities/user'
 import { toast } from 'react-toastify'
 
 export const UsersPage = () => {
-    const { user: currentUser } = use(UserContext)
+    const currentUser = useCurrentUser()
     const [usersList, setUsersList] = useState<UserType[]>([])
 
     const fetchUsers = () => {

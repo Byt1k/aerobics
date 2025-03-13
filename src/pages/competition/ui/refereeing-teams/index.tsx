@@ -42,8 +42,6 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                     }
                 }
 
-                console.log('result', result)
-
                 setState(result)
             }
             setUsersByCompetitionList(res)
@@ -51,8 +49,6 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
             console.log(e)
         }
     }
-
-    console.log('state', state)
 
     useEffect(() => {
         getRoles()

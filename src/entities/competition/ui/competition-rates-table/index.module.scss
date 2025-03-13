@@ -1,0 +1,27 @@
+.table {
+  width: 100%;
+
+  td {
+    background-color: #fff;
+    border: 1px solid #c8c8c8;
+    padding: 5px;
+    line-height: normal;
+
+
+    &:not(:first-child) {
+      text-align: center;
+    }
+  }
+}
+
+.current {
+  td {
+    background-color: #14AE5C33;
+  }
+}
+
+.confirmed {
+  td {
+    background-color: #E6E6E6;
+  }
+}

@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 import Cookies from 'js-cookie'
 
 export const axiosInstance = axios.create({
-    baseURL: 'http://89.111.153.211/',
+    baseURL: import.meta.env.VITE_BASE_URL,
 })
 
 export const ACCESS_TOKEN_KEY = 'aerobics_access_token'
@@ -14,7 +14,7 @@ axiosInstance.interceptors.request.use(config => {
 })
 
 let isRefreshing: boolean = false;
-let failedQueue: { resolve: (value?: any) => void; reject: (reason?: any) => void }[] = [];
+let failedQueue: { resolve: (value?: unknown) => void; reject: (reason?: unknown) => void }[] = [];
 
 const processQueue = (error: AxiosError | null, token: string | null = null) => {
     failedQueue.forEach((prom) => {
@@ -40,6 +40,8 @@ axiosInstance.interceptors.response.use(
             if (isRefreshing) {
                 try {
                     const token = await new Promise<string>(function (resolve, reject) {
+                        // eslint-disable-next-line
+                        // @ts-ignore
                         failedQueue.push({ resolve, reject });
                     });
 

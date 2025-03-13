@@ -5,8 +5,6 @@ export const routes = {
     competition: (params?: { id: string }) => routeReplacer('/competitions/:id', params),
 }
 
-export const startPage = (role?: number) => routes.users()
-
 function routeReplacer(route: string, params?: Record<string, string>): string {
     let result = route
 

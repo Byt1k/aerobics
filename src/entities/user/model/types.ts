@@ -2,6 +2,7 @@ export interface UserType {
     id: number
     username: string
     disabled: boolean
+    is_admin: boolean
 }
 
 export const userRolesList = {

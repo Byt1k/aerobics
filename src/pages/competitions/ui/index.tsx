@@ -7,8 +7,10 @@ import { toast } from 'react-toastify'
 import { Link } from 'react-router-dom'
 import Tag, { TagProps } from '@/shared/ui/tag'
 import { formatDate } from '@/shared/lib/formatDate'
+import { useCurrentUser } from '@/entities/user'
 
 export const CompetitionsListPage = () => {
+    const currentUser = useCurrentUser()
     const [competitionsList, setCompetitionsList] = useState<Competition[]>([])
 
     const getCompetitions = () => {
@@ -89,33 +91,39 @@ export const CompetitionsListPage = () => {
                             Открыть
                         </Button>
                     </Link>
-                    <Button
-                        variant="outlined"
-                        className={s.tableBtn}
-                        onClick={() => editCompetition(comp)}
-                    >
-                        Редактировать
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        className={s.tableBtn}
-                        onClick={() => deleteCompetition(comp.id)}
-                        disabled={isDeleting.some(id => id === comp.id)}
-                    >
-                        Удалить
-                    </Button>
+                    {currentUser.is_admin && (
+                        <>
+                            <Button
+                                variant="outlined"
+                                className={s.tableBtn}
+                                onClick={() => editCompetition(comp)}
+                            >
+                                Редактировать
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                className={s.tableBtn}
+                                onClick={() => deleteCompetition(comp.id)}
+                                disabled={isDeleting.some(id => id === comp.id)}
+                            >
+                                Удалить
+                            </Button>
+                        </>
+                    )}
                 </div>
             )
         }
-    ], [isDeleting])
+    ], [isDeleting, currentUser])
 
     return (
         <div className="flex flex-col gap-8">
             <div className="flex items-center justify-between">
                 <h1>Соревнования</h1>
-                <Button onClick={() => setEditorOpened(true)}>
-                    Создать соревнование
-                </Button>
+                {currentUser.is_admin && (
+                    <Button onClick={() => setEditorOpened(true)}>
+                        Создать соревнование
+                    </Button>
+                )}
             </div>
 
             <Table<Competition> columns={columns} data={competitionsList} />
