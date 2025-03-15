@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useTransition } from 'react'
-import { Competition, Participant, getParticipantsList, UploadParticipantsInput } from '@/entities/competition'
+import { Competition, Participant, getParticipantsList, UploadParticipantsInput, swapParticipants } from '@/entities/competition'
 import tableStyles from '@/shared/ui/table/index.module.scss'
+import { svgIcons } from '@/shared/lib/svgIcons'
+import s from './index.module.scss'
+import { toast } from 'react-toastify'
 
 const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
     const [list, setList] = useState<Participant[]>([])
@@ -28,7 +31,9 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
                     uniqCities.add(participant.city)
                 })
 
-                for (const queue of uniqQueues) {
+                const queues = Array.from(uniqQueues).sort()
+
+                for (const queue of queues) {
                     result[queue] = {}
 
                     for (const nomination of uniqNominations) {
@@ -42,7 +47,7 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
 
                 setList(res)
                 setTableState(result)
-                setQueue(Array.from(uniqQueues))
+                setQueue(queues)
                 setNominations(Array.from(uniqNominations))
                 setCities(Array.from(uniqCities))
             } catch {
@@ -54,6 +59,23 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
     useEffect(() => {
         fetchParticipants()
     }, [])
+
+    const [isSwapping, startSwapping] = useTransition()
+
+    const swap = (order1: number, order2: number) => {
+        startSwapping(async () => {
+            try {
+                await swapParticipants(competition.id, {
+                    participant_order_num_1: order1,
+                    participant_order_num_2: order2,
+                })
+                fetchParticipants()
+                toast.success('Изменения сохранены')
+            } catch {
+                toast.error('Не удалось сохранить изменения')
+            }
+        })
+    }
 
     return (
         <div>
@@ -87,7 +109,7 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
                     <table className={tableStyles.table} key={queue}>
                         <thead>
                             <tr>
-                                <td colSpan={3} className="text-center">
+                                <td colSpan={4} className="text-center">
                                     <h3>Бригада {queue}</h3>
                                 </td>
                             </tr>
@@ -98,13 +120,36 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
                                     return (
                                         <React.Fragment key={nomination}>
                                             <tr>
-                                                <td colSpan={3} className="text-center font-bold">{nomination}</td>
+                                                <td colSpan={4} className="text-center font-bold">{nomination}</td>
                                             </tr>
-                                            {participants.map(p => (
+                                            {participants.map((p, index) => (
                                                 <tr key={p.id}>
                                                     <td>{p.order_num}</td>
                                                     <td className="whitespace-pre-wrap">{p.names}</td>
                                                     <td>{`${p.country}, ${p.city}`}</td>
+                                                    <td>
+                                                        {['unrated', 'not_started'].includes(competition.status) && (
+                                                            <div className={s.actions}>
+                                                                {index < participants.length - 1 && (
+                                                                    <button
+                                                                        disabled={isSwapping}
+                                                                        onClick={() => swap(p.order_num, participants[index + 1].order_num)}
+                                                                    >
+                                                                        {svgIcons.dropdown}
+                                                                    </button>
+                                                                )}
+                                                                {!!index && (
+                                                                    <button
+                                                                        className={s.top}
+                                                                        disabled={isSwapping}
+                                                                        onClick={() => swap(p.order_num, participants[index - 1].order_num)}
+                                                                    >
+                                                                    {svgIcons.dropdown}
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </td>
                                                 </tr>
                                             ))}
                                         </React.Fragment>
@@ -115,7 +160,7 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
                             })}
                         </tbody>
                     </table>
-                )) }
+                ))}
             </div>
         </div>
     )

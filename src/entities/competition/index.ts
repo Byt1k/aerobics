@@ -9,6 +9,7 @@ export { setUserToCompetition } from './actions/set-user-to-competition'
 export { unsetUserByCompetition } from './actions/unset-user-by-competition'
 export { getUserRoleAndQueue } from './actions/get-user-role-and-queue'
 export type { UserRoleAndQueueByCompetition } from './actions/get-user-role-and-queue'
+export { swapParticipants } from './actions/swap-participants'
 
 export { CompetitionEditorPopup } from './ui/editor-popup'
 export { UploadParticipantsInput } from './ui/upload-participants-input'
