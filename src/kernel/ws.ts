@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Cookies from 'js-cookie'
 import { ACCESS_TOKEN_KEY } from './instance'
 import { Participant } from '@/entities/competition'
@@ -6,6 +6,7 @@ import { UserRoleTitle } from '@/entities/user'
 
 export const useWebSocket = (competitionId: number) => {
     const [ws, setWs] = useState<WebSocket | null>(null)
+    const isReconnectedRef = useRef(false)
 
     const connect = useCallback(() => {
         const token = Cookies.get(ACCESS_TOKEN_KEY)
@@ -14,10 +15,14 @@ export const useWebSocket = (competitionId: number) => {
 
         newWs.onopen = () => {
             setWs(newWs)
+            isReconnectedRef.current = false
         }
 
         newWs.onclose = () => {
-
+            if (!isReconnectedRef.current) {
+                isReconnectedRef.current = true
+                connect()
+            }
         }
 
         newWs.onerror = (error) => {
