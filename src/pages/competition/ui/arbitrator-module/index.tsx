@@ -65,6 +65,11 @@ export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQ
             return
         }
 
+        if ([deductionLine, deductionElement, deductionJudge].some(value => value.length > 3 || +value < 0)) {
+            toast.error('Некорректные данные')
+            return
+        }
+
         const payload = {
             participant_id: currentRow.participant_id,
             deduction_line: +deductionLine,

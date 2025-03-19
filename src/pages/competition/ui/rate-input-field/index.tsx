@@ -7,6 +7,7 @@ import { useWebSocket, RatingRow, RatingRowsByBrigades, Rate } from '@/kernel/ws
 import { useCurrentUser } from '@/entities/user'
 import { toast } from 'react-toastify'
 import classNames from 'classnames'
+import { userRolesList } from '../../../../entities/user'
 
 export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competition }) => {
     const currentUser = useCurrentUser()
@@ -55,6 +56,19 @@ export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competiti
 
     const sendRate = () => {
         if (!currentRow) return
+
+        if (rate.length > 3) {
+            toast.error('Некорректная оценка')
+            return
+        }
+
+        if (refereeRoleAndQueue.role.id === userRolesList['сложность судья'] && +rate < 0) {
+            toast.error('Некорректная оценка')
+            return
+        } else if (+rate < 5 || +rate > 10) {
+            toast.error('Некорректная оценка')
+            return
+        }
 
         const payload = {
             participant_id: currentRow.participant_id,

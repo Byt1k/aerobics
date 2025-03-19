@@ -28,7 +28,7 @@ export const useWebSocket = (competitionId: number) => {
         newWs.onerror = (error) => {
             console.error('WebSocket error:', error)
         }
-    }, [competitionId, ws])
+    }, [isReconnectedRef.current, competitionId, ws])
 
     useEffect(() => {
         connect()
