@@ -87,6 +87,13 @@ export const CompetitionPage = () => {
                             {svgIcons.download}
                         </Button>
                     )}
+
+                    {refereeRoleAndQueue && [userRolesList['арбитр'], userRolesList['главный судья']]
+                        //eslint-disable-next-line
+                        // @ts-ignore
+                        .includes(refereeRoleAndQueue.role.id) && (
+                            <h3 className="ml-auto">{refereeRoleAndQueue.role.title.toUpperCase()}</h3>
+                    )}
                 </div>
                 <p>Дата начала: {formatDate(competition.date_start)}</p>
             </div>
@@ -104,7 +111,7 @@ export const CompetitionPage = () => {
 
             {[
                 userRolesList['исполнение судья'],
-                userRolesList['элемент судья'],
+                userRolesList['артистичность судья'],
                 userRolesList['сложность судья'],
                 // eslint-disable-next-line
                 // @ts-ignore
