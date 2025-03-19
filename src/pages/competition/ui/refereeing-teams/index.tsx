@@ -3,8 +3,6 @@ import { getRoles, getUsersList, UserRole, UserType, UserByCompetition, userRole
 import { Competition, getUsersByCompetition, setUserToCompetition, unsetUserByCompetition } from '@/entities/competition'
 import s from './index.module.scss'
 import Select, { SelectOptionType } from '@/shared/ui/select'
-import Button from '@/shared/ui/button'
-import { svgIcons } from '@/shared/lib/svgIcons'
 import { toast } from 'react-toastify'
 
 const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }) => {
@@ -17,36 +15,51 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
 
     const fetchUsersByCompetition = async () => {
         try {
-            const res = await getUsersByCompetition(competition.id)
+            const response = await getUsersByCompetition(competition.id)
 
-            if (res.length) {
+            if (response.length) {
                 const result: State = {}
 
                 for (let q = 1; q <= competition.queues_amount; q++) {
-                    result[q] = []
+                    const arr1 = Array(4).fill({
+                        id: null,
+                        roleId: userRolesList['исполнение судья'],
+                    })
+
+                    const arr2 = Array(4).fill({
+                        id: null,
+                        roleId: userRolesList['артистичность судья'],
+                    })
+
+                    const arr3 = Array(1).fill({
+                        id: null,
+                        roleId: userRolesList['сложность судья'],
+                    })
+
+                    const arr4 = Array(1).fill({
+                        id: null,
+                        roleId: userRolesList['арбитр'],
+                    })
+
+                    result[q] = arr1.concat(arr2).concat(arr3).concat(arr4)
                 }
 
-                for (const user of res) {
+                for (const user of response) {
                     if (user.role.id === userRolesList['главный судья']) {
                         setMainRefereeUserId(user.id)
-                    } else if (result[user.queue_index]) {
-                        result[user.queue_index].push({
-                            roleId: user.role.id,
-                            id: user.id
-                        })
                     } else {
-                        result[user.queue_index] = [{
-                            roleId: user.role.id,
-                            id: user.id
-                        }]
+                        const queue = user.queue_index
+                        const index = result[queue].findIndex(u => u.roleId === user.role.id && !u.id)
+                        result[queue].slice(index, 1)
+                        result[queue].splice(index, 1, { roleId: user.role.id, id: user.id})
                     }
                 }
 
                 setState(result)
             }
-            setUsersByCompetitionList(res)
-        } catch (e) {
-            console.log(e)
+            setUsersByCompetitionList(response)
+        } catch {
+            //
         }
     }
 
@@ -69,17 +82,6 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
             )
         return freeUsers.map(user => ({ value: user.id.toString(), label: user.username }))
     }, [allUsers, usersByCompetitionList])
-
-    const deleteUserByCompetition = async (userId: number) => {
-        try {
-            await unsetUserByCompetition(userId, competition.id)
-            toast.success('Удалено!')
-        } catch {
-            toast.error('Что-то пошло нет так')
-        }
-
-        fetchUsersByCompetition()
-    }
 
     const userByCompetitionOnChange = async ({ prevUserId, userId, roleId, queueIndex, userIndex }: UserByCompetitionPayload) => {
         if (userId && !roleId && queueIndex) {
@@ -156,7 +158,7 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                     <div className={s.teem} key={queue}>
                         <h3>Бригада {queue}</h3>
                         {users.map((user, userIndex) => (
-                            <div key={user.id} className={s.item}>
+                            <div key={userIndex} className={s.item}>
                                 <Select
                                     options={getFreeUsersWithCurrent(user.id ?? 0)}
                                     value={state[+queue][userIndex].id?.toString()}
@@ -177,38 +179,10 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                                         }))
                                     }
                                     value={state[+queue][userIndex].roleId?.toString()}
-                                    onChange={roleId => userByCompetitionOnChange({
-                                        prevUserId: state[+queue][userIndex].id || undefined,
-                                        userId: state[+queue][userIndex].id,
-                                        roleId: +roleId as UserRoleId,
-                                        queueIndex: +queue,
-                                        userIndex: userIndex,
-                                    })}
+                                    locked
                                 />
-                                <button onClick={() => {
-                                    if (usersByCompetitionList.some(({ id }) => id === user.id)) {
-                                        deleteUserByCompetition(user.id ?? 0)
-                                    } else {
-                                        setState(prev => ({
-                                            ...prev,
-                                            [queue]: prev[+queue].filter((_, i) => i !== userIndex)
-                                        }))
-                                    }
-                                }}>
-                                    {svgIcons.trash}
-                                </button>
                             </div>
                         ))}
-                        <Button
-                            variant="transparent"
-                            onClick={() => setState(prev => ({
-                                ...prev,
-                                [queue]: [...prev[+queue], { roleId: null, id: null }]
-                            }))}
-                            disabled={state[+queue].length > 0 && (!state[+queue][state[+queue].length - 1].id || !state[+queue][state[+queue].length - 1].roleId)}
-                        >
-                            + Добавить
-                        </Button>
                     </div>
                 ))}
             </div>
@@ -222,7 +196,7 @@ type State = Record<number, UserByState[]>
 
 interface UserByState {
     id: number | null
-    roleId: UserRoleId | null
+    roleId: UserRoleId
 }
 
 interface UserByCompetitionPayload {

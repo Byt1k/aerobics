@@ -84,6 +84,14 @@
                 border: 1px solid #900b09;
             }
         }
+
+        &.locked {
+            pointer-events: none;
+
+            .icon {
+                display: none;
+            }
+        }
     }
 
     .errorMessage {
