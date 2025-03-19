@@ -1,0 +1,20 @@
+.participant {
+  &.draggable {
+    cursor: grab;
+  }
+
+  .delete {
+    display: block;
+    margin-left: auto;
+
+    svg {
+      path {
+        stroke: #ff7676;
+      }
+    }
+
+    &:disabled svg path {
+      stroke: #b3b3b3;
+    }
+  }
+}

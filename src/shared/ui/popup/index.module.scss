@@ -21,7 +21,7 @@
 
     .modal {
         background: #fff !important;
-        min-width: 580px;
+        min-width: 700px;
         max-width: 100%;
         border-radius: 15px;
         position: relative;
@@ -42,6 +42,10 @@
         &::-webkit-scrollbar-thumb {
             background-color: gray;
             border-radius: 9em;
+        }
+
+        h2 {
+            max-width: 95%;
         }
 
         .content {

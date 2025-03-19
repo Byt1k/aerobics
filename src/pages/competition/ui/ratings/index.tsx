@@ -42,6 +42,7 @@ const CompetitionRatings: React.FC<Props> = ({ competition }) => {
                     queue={+queue}
                     rows={rows}
                     nominations={nominations[+queue]}
+                    competitionId={competition.id}
                 />
             ))}
         </div>

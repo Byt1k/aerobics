@@ -3,7 +3,7 @@ import React, { useMemo } from 'react'
 import RefereeingTeams from '../ui/refereeing-teams'
 import CompetitionParticipants from '../ui/participants'
 import CompetitionRatings from '../ui/ratings'
-import { Competition } from '../../../entities/competition'
+import { Competition } from '@/entities/competition'
 
 export const AdminContent: React.FC<Props> = ({ competition }) => {
     const items: TabsProps['items'] = useMemo(() => {
@@ -17,7 +17,7 @@ export const AdminContent: React.FC<Props> = ({ competition }) => {
             },
             {
                 key: '2',
-                label: 'Стартовый протокол',
+                label: 'Участники',
                 children: <CompetitionParticipants competition={competition} />,
             },
             {

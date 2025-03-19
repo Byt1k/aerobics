@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getCompetition, Competition, competitionStatuses } from '@/entities/competition'
 import Tag, { TagProps } from '@/shared/ui/tag'
 import { formatDate } from '@/shared/lib/formatDate'
 import { Breadcrumb } from 'antd'
@@ -8,15 +7,26 @@ import { routes } from '@/kernel/routes'
 import { AdminContent } from './admin-content'
 import { RateInputField } from '../ui/rate-input-field'
 import { useCurrentUser, userRolesList } from '@/entities/user'
-import { getUserRoleAndQueue, UserRoleAndQueueByCompetition } from '@/entities/competition'
+import {
+    getUserRoleAndQueue,
+    UserRoleAndQueueByCompetition,
+    CompetitionReportPopup,
+    getCompetition,
+    Competition,
+    competitionStatuses,
+} from '@/entities/competition'
 import { ArbitratorModule } from '../ui/arbitrator-module'
 import Ratings from '../ui/ratings'
+import Button from '@/shared/ui/button'
+import { svgIcons } from '@/shared/lib/svgIcons'
 
 export const CompetitionPage = () => {
     const { id } = useParams()
     const currentUser = useCurrentUser()
     const [competition, setCompetition] = useState<Competition | null>(null)
     const [isPending, setIsPending] = useState(true)
+
+    const [isReport, setIsReport] = useState(false)
 
     const [refereeRoleAndQueue, setRefereeRoleAndQueue] = useState<UserRoleAndQueueByCompetition | null>(null)
 
@@ -66,11 +76,31 @@ export const CompetitionPage = () => {
                     >
                         {competitionStatuses[competition.status]}
                     </Tag>
+
+                    {currentUser.is_admin && (
+                        <Button
+                            variant="transparent"
+                            className="ml-auto"
+                            onClick={() => setIsReport(true)}
+                        >
+                            Сформировать отчет
+                            {svgIcons.download}
+                        </Button>
+                    )}
                 </div>
                 <p>Дата начала: {formatDate(competition.date_start)}</p>
             </div>
 
-            {currentUser.is_admin && <AdminContent competition={competition} />}
+            {currentUser.is_admin && (
+                <>
+                    <AdminContent competition={competition} />
+                    <CompetitionReportPopup
+                        active={isReport}
+                        setActive={setIsReport}
+                        competitionId={competition.id}
+                    />
+                </>
+            )}
 
             {[
                 userRolesList['исполнение судья'],

@@ -27,5 +27,6 @@ export interface Participant {
     city: string
     country: string
     id: number
+    confirmed: boolean
 }
 

@@ -104,6 +104,7 @@ export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQ
                rows={rows}
                nominations={nominations}
                declinedRate={declinedRate}
+               competitionId={competition.id}
            />
            {!!currentRow && (
                <div className="flex flex-col gap-4 bg-white p-8 rounded-3xl">

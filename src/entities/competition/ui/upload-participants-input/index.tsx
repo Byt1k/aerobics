@@ -3,8 +3,9 @@ import s from './index.module.scss'
 import Button from '@/shared/ui/button'
 import { toast } from 'react-toastify'
 import { uploadParticipants } from '../../actions/upload-participants'
+import classNames from 'classnames'
 
-export const UploadParticipantsInput: React.FC<Props> = ({ fetchParticipants, competitionId }) => {
+export const UploadParticipantsInput: React.FC<Props> = ({ fetchParticipants, competitionId, className }) => {
     const uploadInputRef = useRef<HTMLInputElement>(null)
     const [isUploading, startTransition] = useTransition()
 
@@ -27,7 +28,7 @@ export const UploadParticipantsInput: React.FC<Props> = ({ fetchParticipants, co
     }
 
     return (
-        <Button className={s.upload} disabled={isUploading}>
+        <Button className={classNames(s.upload, className)} disabled={isUploading}>
             <label className="w-full h-full flex items-center justify-center">
                 <input
                     type="file"
@@ -44,4 +45,5 @@ export const UploadParticipantsInput: React.FC<Props> = ({ fetchParticipants, co
 interface Props {
     competitionId: number
     fetchParticipants: () => void
+    className?: string
 }

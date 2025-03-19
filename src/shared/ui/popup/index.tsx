@@ -23,8 +23,8 @@ const Popup: FC<IProps> = ({ active, setActive, title, content, actions, onClose
     }, [])
 
     return (
-        <div className={classNames(s.overflow, { [s.active]: active })} onClick={close}>
-            <div className={s.modal} onClick={e => e.stopPropagation()}>
+        <div className={classNames(s.overflow, { [s.active]: active })} onMouseDown={close}>
+            <div className={s.modal} onMouseDown={e => e.stopPropagation()}>
                 <button className={s.close} onClick={close}>
                     {svgIcons.close}
                 </button>
