@@ -14,14 +14,14 @@ interface LeaderboardItem {
 
 export const CompetitionRatesTable: React.FC<Props> = ({
     queue,
-    nominations,
+    nominationsWithAgeGroup,
     rows,
     declinedRate,
     competitionId,
 }) => {
     const currentUser = useCurrentUser()
     const [isReport, setIsReport] = useState(false)
-    const [selectedReportNomination, setSelectedReportNomination] = useState<string>()
+    const [reportNominationWithAgeGroup, setReportNominationWithAgeGroup] = useState<string>()
     const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([])
 
     const totalExecutionOrArtistry = (rates: Array<Rate | null>): number | null => {
@@ -118,15 +118,15 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                 </tr>
                 </thead>
                 <tbody>
-                {Array.from(nominations).map(nomination => (
-                    <React.Fragment key={nomination}>
+                {Array.from(nominationsWithAgeGroup).map(nominationWithAgeGroup => (
+                    <React.Fragment key={nominationWithAgeGroup}>
                         <tr>
                             <td className="text-center font-bold" colSpan={20}>
                                 <div className="flex items-center justify-center gap-4">
-                                    {nomination}
+                                    {nominationWithAgeGroup}
                                     {currentUser.is_admin && (
                                         <button onClick={() => {
-                                            setSelectedReportNomination(nomination)
+                                            setReportNominationWithAgeGroup(nominationWithAgeGroup)
                                             setIsReport(true)
                                         }}>
                                             {svgIcons.download}
@@ -136,7 +136,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                             </td>
                         </tr>
                         {rows.map((row, rowIndex) => {
-                            if (row.participant.nomination === nomination) {
+                            if (row.participant.nomination === nominationWithAgeGroup.split(' | ')[0]) {
                                 return (
                                     <tr
                                         key={row.participant_id}
@@ -227,8 +227,8 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                 active={isReport}
                 setActive={setIsReport}
                 competitionId={competitionId}
-                nomination={selectedReportNomination}
-                onClose={() => setSelectedReportNomination(undefined)}
+                nominationWithAgeGroup={reportNominationWithAgeGroup}
+                onClose={() => setReportNominationWithAgeGroup(undefined)}
             />
         </>
     )
@@ -236,7 +236,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
 
 interface Props {
     queue: number
-    nominations: Set<string>
+    nominationsWithAgeGroup: Set<string>
     rows: RatingRow[]
     declinedRate?: (userId: number) => void
     competitionId: number

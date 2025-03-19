@@ -5,7 +5,7 @@ import Button from '@/shared/ui/button'
 import { downloadCompetitionReport } from '../../actions/download-report'
 import { toast } from 'react-toastify'
 
-export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onClose, competitionId, nomination }) => {
+export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onClose, competitionId, nominationWithAgeGroup }) => {
     const [date, setDate] = useState('')
     const [mainJudge, setMainJudge] = useState('')
     const [mainSecretary, setMainSecretary] = useState('')
@@ -16,6 +16,8 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
         e.preventDefault()
 
         startTransition(async () => {
+            const [nomination, ageGroup] = nominationWithAgeGroup ? nominationWithAgeGroup.split(' | ') : []
+
             try {
                 await downloadCompetitionReport({
                     competition_id: competitionId,
@@ -23,6 +25,7 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
                     main_judge: mainJudge,
                     main_secretary: mainSecretary,
                     nomination: nomination,
+                    age_group: ageGroup,
                 })
                 setActive(false)
             } catch {
@@ -48,7 +51,7 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
             active={active}
             setActive={setActive}
             onClose={onClose}
-            title={`Формирование отчета ${nomination ? `по номинации "${nomination}"` : 'по соревнованию'}`}
+            title={`Формирование отчета ${nominationWithAgeGroup ? `по номинации "${nominationWithAgeGroup}"` : 'по соревнованию'}`}
             content={
                 <form className="flex flex-col gap-4" onSubmit={onSubmit}>
                     <Input
@@ -85,7 +88,7 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
 interface Props {
     active: boolean
     setActive: (v: boolean) => void
-    nomination?: string
+    nominationWithAgeGroup?: string
     competitionId: number
     onClose?: () => void
 }

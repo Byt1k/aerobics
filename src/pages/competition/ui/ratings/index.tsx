@@ -5,7 +5,9 @@ import { CompetitionRatesTable } from '@/entities/competition'
 
 const CompetitionRatings: React.FC<Props> = ({ competition }) => {
     const { ws } = useWebSocket(competition.id)
-    const [nominations, setNominations] = useState<NominationsByBrigades>({})
+    const [nominationsWithAgeGroup, setNominationsWithAgeGroup] = useState<
+        NominationsByBrigades
+    >({}) // `${nomination} | ${age_group}`
     const [tableData, setTableData] = useState<RatingRowsByBrigades>({})
 
     useEffect(() => {
@@ -19,15 +21,17 @@ const CompetitionRatings: React.FC<Props> = ({ competition }) => {
 
             Object.entries(data).forEach(([queue, rows]) => {
                 rows.forEach(row => {
+                    const nominationWithAgeGroup = `${row.participant.nomination} | ${row.participant.age_group}`
+
                     if (uniqNominations[+queue]) {
-                        uniqNominations[+queue].add(row.participant.nomination)
+                        uniqNominations[+queue].add(nominationWithAgeGroup)
                     } else {
-                        uniqNominations[+queue] = new Set([row.participant.nomination])
+                        uniqNominations[+queue] = new Set([nominationWithAgeGroup])
                     }
                 })
             })
 
-            setNominations(uniqNominations)
+            setNominationsWithAgeGroup(uniqNominations)
             setTableData(data)
         }
     }, [ws])
@@ -41,7 +45,7 @@ const CompetitionRatings: React.FC<Props> = ({ competition }) => {
                     key={queue}
                     queue={+queue}
                     rows={rows}
-                    nominations={nominations[+queue]}
+                    nominationsWithAgeGroup={nominationsWithAgeGroup[+queue]}
                     competitionId={competition.id}
                 />
             ))}

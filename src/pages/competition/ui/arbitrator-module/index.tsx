@@ -8,7 +8,7 @@ import { toast } from 'react-toastify'
 
 export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQueue }) => {
     const { ws } = useWebSocket(competition.id)
-    const [nominations, setNominations] = useState<Set<string>>(new Set())
+    const [nominationsWithAgeGroup, setNominationsWithAgeGroup] = useState<Set<string>>(new Set())
     const [rows, setRows] = useState<RatingRow[]>([])
 
     const [currentRow, setCurrentRow] = useState<RatingRow | null>(null)
@@ -36,12 +36,13 @@ export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQ
             const uniqNominations: Set<string> = new Set()
 
             data.forEach(row => {
-                uniqNominations.add(row.participant.nomination)
+                const nominationWithAgeGroup = `${row.participant.nomination} | ${row.participant.age_group}`
+                uniqNominations.add(nominationWithAgeGroup)
             })
 
             const current = data.find(r => !r.confirmed)
 
-            setNominations(uniqNominations)
+            setNominationsWithAgeGroup(uniqNominations)
             setRows(data)
             setCurrentRow(current ?? null)
 
@@ -102,7 +103,7 @@ export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQ
            <CompetitionRatesTable
                queue={refereeRoleAndQueue.queue_index}
                rows={rows}
-               nominations={nominations}
+               nominationsWithAgeGroup={nominationsWithAgeGroup}
                declinedRate={declinedRate}
                competitionId={competition.id}
            />
