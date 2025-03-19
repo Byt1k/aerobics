@@ -90,38 +90,47 @@ export const ParticipantRowsList: React.FC<Props> = ({
         move(+dragOrder, +dropOrder)
     }
 
-    return optimisticParticipants.map(participant => (
-        <tr
-            key={participant.id}
-            className={classNames(s.participant, { [s.draggable]: !participant.confirmed })}
-            draggable={!participant.confirmed && !isMoving}
-            data-order={participant.order_num}
-            onDragStart={handleDragStart}
-            onDragOver={!participant.confirmed ? handleDragOver : undefined}
-            onDragLeave={!participant.confirmed ? handleDragLeave : undefined}
-            onDrop={handleDrop}
-        >
-            <td>{participant.order_num}</td>
-            <td className="whitespace-pre-wrap">{participant.names}</td>
-            <td>{`${participant.country}, ${participant.city}`}</td>
-            <td>
-                {!participant.confirmed && (
-                    <Popconfirm
-                        title="Вы действительно хотите удалить участника?"
-                        okText="Удалить"
-                        cancelText="Отмена"
-                        onConfirm={() => deleteParticipant(participant.id)}
-                    >
-                        <button
-                            disabled={isDeleting}
-                            className={s.delete}
+    return optimisticParticipants.map((participant, index) => (
+        <React.Fragment key={participant.id}>
+            {optimisticParticipants[index - 1]?.nomination_shortened !== participant.nomination_shortened && (
+                <tr>
+                    <td colSpan={4} className="text-center font-bold">
+                        {participant.nomination_shortened}
+                    </td>
+                </tr>
+            )}
+            <tr
+                key={participant.id}
+                className={classNames(s.participant, { [s.draggable]: !participant.confirmed })}
+                draggable={!participant.confirmed && !isMoving}
+                data-order={participant.order_num}
+                onDragStart={handleDragStart}
+                onDragOver={!participant.confirmed ? handleDragOver : undefined}
+                onDragLeave={!participant.confirmed ? handleDragLeave : undefined}
+                onDrop={handleDrop}
+            >
+                <td>{participant.order_num}</td>
+                <td className="whitespace-pre-wrap">{participant.names}</td>
+                <td>{`${participant.country}, ${participant.city}`}</td>
+                <td>
+                    {!participant.confirmed && (
+                        <Popconfirm
+                            title="Вы действительно хотите удалить участника?"
+                            okText="Удалить"
+                            cancelText="Отмена"
+                            onConfirm={() => deleteParticipant(participant.id)}
                         >
-                            {svgIcons.trash}
-                        </button>
-                    </Popconfirm>
-                )}
-            </td>
-        </tr>
+                            <button
+                                disabled={isDeleting}
+                                className={s.delete}
+                            >
+                                {svgIcons.trash}
+                            </button>
+                        </Popconfirm>
+                    )}
+                </td>
+            </tr>
+        </React.Fragment>
     ))
 }
 

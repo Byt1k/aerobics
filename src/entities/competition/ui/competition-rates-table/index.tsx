@@ -14,7 +14,6 @@ interface LeaderboardItem {
 
 export const CompetitionRatesTable: React.FC<Props> = ({
     queue,
-    nominationsWithAgeGroup,
     rows,
     declinedRate,
     competitionId,
@@ -118,109 +117,110 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                 </tr>
                 </thead>
                 <tbody>
-                {Array.from(nominationsWithAgeGroup).map(nominationWithAgeGroup => (
-                    <React.Fragment key={nominationWithAgeGroup}>
-                        <tr>
-                            <td className="text-center font-bold" colSpan={20}>
-                                <div className="flex items-center justify-center gap-4">
-                                    {nominationWithAgeGroup}
-                                    {currentUser.is_admin && (
-                                        <button onClick={() => {
-                                            setReportNominationWithAgeGroup(nominationWithAgeGroup)
-                                            setIsReport(true)
-                                        }}>
-                                            {svgIcons.download}
-                                        </button>
-                                    )}
-                                </div>
-                            </td>
-                        </tr>
-                        {rows.map((row, rowIndex) => {
-                            if (row.participant.nomination === nominationWithAgeGroup.split(' | ')[0]) {
-                                return (
-                                    <tr
-                                        key={row.participant_id}
-                                        className={classNames(
-                                            { [s.current]: !rowIndex && !row.confirmed },
-                                            { [s.current]: rows[rowIndex - 1]?.confirmed && !row.confirmed },
-                                            { [s.confirmed]: row.confirmed },
-                                        )}>
-                                        <td>
-                                            {row.participant.names}
-                                        </td>
+                {rows.map((row, rowIndex) => {
+                    const nominationWithAgeGroup = `${row.participant.nomination} | ${row.participant.age_group}`
+                    const prevNominationWithAgeGroup = `${rows[rowIndex - 1]?.participant.nomination} | ${rows[rowIndex - 1]?.participant.age_group}`
 
-                                        {row.rates['исполнение'].map((rate, i) => (
-                                            <td key={i}>
-                                                {declinedRate && rate ? (
-                                                    <Popconfirm
-                                                        title={`Вы хотите отменить оценку И${i + 1}`}
-                                                        cancelText="Нет"
-                                                        okText="Да"
-                                                        onConfirm={() => declinedRate(rate.user_id)}
-                                                    >
-                                                        <button>{rate?.rate}</button>
-                                                    </Popconfirm>
-                                                ) : rate?.rate}
-                                            </td>
-                                        ))}
-                                        <td>{totalExecutionOrArtistry(row.rates['исполнение'])}</td>
+                    return (
+                        <React.Fragment key={row.participant_id}>
+                            {nominationWithAgeGroup !== prevNominationWithAgeGroup && (
+                                <tr>
+                                    <td className="text-center font-bold" colSpan={20}>
+                                        <div className="flex items-center justify-center gap-4">
+                                            {nominationWithAgeGroup}
+                                            {currentUser.is_admin && (
+                                                <button onClick={() => {
+                                                    setReportNominationWithAgeGroup(nominationWithAgeGroup)
+                                                    setIsReport(true)
+                                                }}>
+                                                    {svgIcons.download}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                            <tr
+                                key={row.participant_id}
+                                className={classNames(
+                                    { [s.current]: !rowIndex && !row.confirmed },
+                                    { [s.current]: rows[rowIndex - 1]?.confirmed && !row.confirmed },
+                                    { [s.confirmed]: row.confirmed },
+                                )}>
+                                <td>
+                                    {row.participant.names}
+                                </td>
 
-                                        {row.rates['артистичность'].map((rate, i) => (
-                                            <td key={i}>
-                                                {declinedRate && rate ? (
-                                                    <Popconfirm
-                                                        title={`Вы хотите отменить оценку А${i + 1}`}
-                                                        cancelText="Нет"
-                                                        okText="Да"
-                                                        onConfirm={() => declinedRate(rate.user_id)}
-                                                    >
-                                                        <button>{rate?.rate}</button>
-                                                    </Popconfirm>
-                                                ) : rate?.rate}
-                                            </td>
-                                        ))}
-                                        <td>{totalExecutionOrArtistry(row.rates['артистичность'])}</td>
+                                {row.rates['исполнение'].map((rate, i) => (
+                                    <td key={i}>
+                                        {declinedRate && rate ? (
+                                            <Popconfirm
+                                                title={`Вы хотите отменить оценку И${i + 1}`}
+                                                cancelText="Нет"
+                                                okText="Да"
+                                                onConfirm={() => declinedRate(rate.user_id)}
+                                            >
+                                                <button>{rate?.rate}</button>
+                                            </Popconfirm>
+                                        ) : rate?.rate}
+                                    </td>
+                                ))}
+                                <td>{totalExecutionOrArtistry(row.rates['исполнение'])}</td>
 
-                                        <td>
-                                            {declinedRate && row.rates['сложность'][0]?.rate ? (
-                                                <Popconfirm
-                                                    title={`Вы хотите отменить оценку С1`}
-                                                    cancelText="Нет"
-                                                    okText="Да"
-                                                    onConfirm={() => declinedRate(row.rates['сложность'][0]!.user_id)}
-                                                >
-                                                    <button>{row.rates['сложность'][0]?.rate}</button>
-                                                </Popconfirm>
-                                            ) : row.rates['сложность'][0]?.rate}
-                                        </td>
-                                        <td>{row.rates['сложность'][0]?.rate}</td>
-                                        <td>
-                                            {row.rates['сложность'][0]?.rate
-                                                ? row.rates['сложность'][0]?.rate / 2
-                                                : null
-                                            }
-                                        </td>
+                                {row.rates['артистичность'].map((rate, i) => (
+                                    <td key={i}>
+                                        {declinedRate && rate ? (
+                                            <Popconfirm
+                                                title={`Вы хотите отменить оценку А${i + 1}`}
+                                                cancelText="Нет"
+                                                okText="Да"
+                                                onConfirm={() => declinedRate(rate.user_id)}
+                                            >
+                                                <button>{rate?.rate}</button>
+                                            </Popconfirm>
+                                        ) : rate?.rate}
+                                    </td>
+                                ))}
+                                <td>{totalExecutionOrArtistry(row.rates['артистичность'])}</td>
 
-                                        <td>{row.deduction_element}</td>
-                                        <td>{row.deduction_line}</td>
-                                        <td>{row.deduction_judge}</td>
-                                        <td>
-                                            {totalDeductions(row)}
-                                        </td>
+                                <td>
+                                    {declinedRate && row.rates['сложность'][0]?.rate ? (
+                                        <Popconfirm
+                                            title={`Вы хотите отменить оценку С1`}
+                                            cancelText="Нет"
+                                            okText="Да"
+                                            onConfirm={() => declinedRate(row.rates['сложность'][0]!.user_id)}
+                                        >
+                                            <button>{row.rates['сложность'][0]?.rate}</button>
+                                        </Popconfirm>
+                                    ) : row.rates['сложность'][0]?.rate}
+                                </td>
+                                <td>{row.rates['сложность'][0]?.rate}</td>
+                                <td>
+                                    {row.rates['сложность'][0]?.rate
+                                        ? row.rates['сложность'][0]?.rate / 2
+                                        : null
+                                    }
+                                </td>
 
-                                        <td>
-                                            {calculateTotalRate(row)}
-                                        </td>
-                                        <td>
-                                            {row.confirmed && leaderboard
-                                                .findIndex(p => p.participantId === row.participant_id)! + 1}
-                                        </td>
-                                    </tr>
-                                )
-                            }
-                        })}
-                    </React.Fragment>
-                ))}
+                                <td>{row.deduction_element}</td>
+                                <td>{row.deduction_line}</td>
+                                <td>{row.deduction_judge}</td>
+                                <td>
+                                    {totalDeductions(row)}
+                                </td>
+
+                                <td>
+                                    {calculateTotalRate(row)}
+                                </td>
+                                <td>
+                                    {row.confirmed && leaderboard
+                                        .findIndex(p => p.participantId === row.participant_id)! + 1}
+                                </td>
+                            </tr>
+                        </React.Fragment>
+                    )
+                })}
                 </tbody>
             </table>
             <CompetitionReportPopup
@@ -236,7 +236,6 @@ export const CompetitionRatesTable: React.FC<Props> = ({
 
 interface Props {
     queue: number
-    nominationsWithAgeGroup: Set<string>
     rows: RatingRow[]
     declinedRate?: (userId: number) => void
     competitionId: number

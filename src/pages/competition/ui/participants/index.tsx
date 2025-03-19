@@ -34,15 +34,11 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
             const queues = Array.from(uniqQueues).sort()
 
             for (const queue of queues) {
-                result[queue] = {}
-
-                for (const nomination of uniqNominations) {
-                    result[queue][nomination] = []
-                }
+                result[queue] = []
             }
 
             res.forEach(participant => {
-                result[participant.queue_index][participant.nomination_shortened].push(participant)
+                result[participant.queue_index].push(participant)
             })
 
             setList(res)
@@ -100,26 +96,11 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {Object.entries(tableState[queue]).map(([nomination, participants]) => {
-                                if (participants.length) {
-                                    return (
-                                        <React.Fragment key={nomination}>
-                                            <tr>
-                                                <td colSpan={4} className="text-center font-bold">
-                                                    {nomination}
-                                                </td>
-                                            </tr>
-                                            <ParticipantRowsList
-                                                competitionId={competition.id}
-                                                participants={participants}
-                                                fetchParticipants={fetchParticipants}
-                                            />
-                                        </React.Fragment>
-                                    )
-                                }
-
-                                return null
-                            })}
+                            <ParticipantRowsList
+                                competitionId={competition.id}
+                                participants={tableState[queue]}
+                                fetchParticipants={fetchParticipants}
+                            />
                         </tbody>
                     </table>
                 ))}
@@ -134,5 +115,4 @@ interface Props {
     competition: Competition
 }
 
-type ParticipantsTable = Record<number, ParticipantsQueue>
-type ParticipantsQueue = Record<string, Participant[]>
+type ParticipantsTable = Record<number, Participant[]>
