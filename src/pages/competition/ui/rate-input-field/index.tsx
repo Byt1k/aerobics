@@ -65,7 +65,7 @@ export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competiti
         if (refereeRoleAndQueue.role.id === userRolesList['сложность судья'] && +rate < 0) {
             toast.error('Некорректная оценка')
             return
-        } else if (+rate < 5 || +rate > 10) {
+        } else if (+rate < 0 || +rate > 10) {
             toast.error('Некорректная оценка')
             return
         }
