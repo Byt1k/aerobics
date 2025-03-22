@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { Competition } from '@/entities/competition'
 import { useWebSocket, RatingRowsByBrigades } from '@/kernel/ws'
-import { CompetitionRatesTable } from '@/entities/competition'
+import { Competition, CompetitionRatesTable } from '@/entities/competition'
+import { useCurrentUser } from '@/entities/user'
 
 const CompetitionRatings: React.FC<Props> = ({ competition }) => {
     const { ws } = useWebSocket(competition.id)
     const [tableData, setTableData] = useState<RatingRowsByBrigades>({})
+    const currentUser = useCurrentUser()
 
     useEffect(() => {
         if (!ws) return
@@ -17,7 +18,9 @@ const CompetitionRatings: React.FC<Props> = ({ competition }) => {
         }
     }, [ws])
 
-
+    const changeRate = (payload: ChangeRatePayload) => {
+        ws?.send(JSON.stringify(payload))
+    }
 
     return (
         <div className="grid grid-cols-2 gap-3">
@@ -27,6 +30,7 @@ const CompetitionRatings: React.FC<Props> = ({ competition }) => {
                     queue={+queue}
                     rows={rows}
                     competitionId={competition.id}
+                    changeRate={currentUser.is_admin ? changeRate : undefined}
                 />
             ))}
         </div>
@@ -37,4 +41,10 @@ export default CompetitionRatings
 
 interface Props {
     competition: Competition
+}
+
+interface ChangeRatePayload {
+    participant_id: number
+    judge_id: number
+    rate: number
 }

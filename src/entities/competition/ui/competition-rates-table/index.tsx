@@ -6,6 +6,7 @@ import { Popconfirm } from 'antd'
 import { useCurrentUser } from '@/entities/user'
 import { svgIcons } from '@/shared/lib/svgIcons'
 import { CompetitionReportPopup } from '../report-popup'
+import { ParticipantRateEditorPopup, SelectedChangingRate } from '../rate-editor-popup'
 
 interface LeaderboardItem {
     participantId: number
@@ -16,6 +17,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
     queue,
     rows,
     declinedRate,
+    changeRate,
     competitionId,
 }) => {
     const currentUser = useCurrentUser()
@@ -67,6 +69,9 @@ export const CompetitionRatesTable: React.FC<Props> = ({
 
         setLeaderboard(confirmedRows)
     }, [rows])
+
+    const [changeRatePopup, setChangeRatePopup] = useState(false)
+    const [selectedChangingRate, setSelectedChangingRate] = useState<SelectedChangingRate>()
 
     return (
         <>
@@ -152,49 +157,40 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                 </td>
 
                                 {row.rates['исполнение'].map((rate, i) => (
-                                    <td key={i}>
-                                        {declinedRate && rate ? (
-                                            <Popconfirm
-                                                title={`Вы хотите отменить оценку И${i + 1}`}
-                                                cancelText="Нет"
-                                                okText="Да"
-                                                onConfirm={() => declinedRate(rate.user_id)}
-                                            >
-                                                <button>{rate?.rate}</button>
-                                            </Popconfirm>
-                                        ) : rate?.rate}
-                                    </td>
+                                    <RateCeil
+                                        key={i}
+                                        rate={rate}
+                                        refereeShortName={`И${i + 1}`}
+                                        declinedRate={declinedRate}
+                                        openPopupChangeRate={changeRate ? setChangeRatePopup : undefined}
+                                        setSelectedRate={setSelectedChangingRate}
+                                        participantId={row.participant_id}
+                                    />
                                 ))}
                                 <td>{totalExecutionOrArtistry(row.rates['исполнение'])}</td>
 
                                 {row.rates['артистичность'].map((rate, i) => (
-                                    <td key={i}>
-                                        {declinedRate && rate ? (
-                                            <Popconfirm
-                                                title={`Вы хотите отменить оценку А${i + 1}`}
-                                                cancelText="Нет"
-                                                okText="Да"
-                                                onConfirm={() => declinedRate(rate.user_id)}
-                                            >
-                                                <button>{rate?.rate}</button>
-                                            </Popconfirm>
-                                        ) : rate?.rate}
-                                    </td>
+                                    <RateCeil
+                                        key={i}
+                                        rate={rate}
+                                        refereeShortName={`А${i + 1}`}
+                                        declinedRate={declinedRate}
+                                        openPopupChangeRate={changeRate ? setChangeRatePopup : undefined}
+                                        setSelectedRate={setSelectedChangingRate}
+                                        participantId={row.participant_id}
+                                    />
                                 ))}
                                 <td>{totalExecutionOrArtistry(row.rates['артистичность'])}</td>
 
-                                <td>
-                                    {declinedRate && row.rates['сложность'][0]?.rate ? (
-                                        <Popconfirm
-                                            title={`Вы хотите отменить оценку С1`}
-                                            cancelText="Нет"
-                                            okText="Да"
-                                            onConfirm={() => declinedRate(row.rates['сложность'][0]!.user_id)}
-                                        >
-                                            <button>{row.rates['сложность'][0]?.rate}</button>
-                                        </Popconfirm>
-                                    ) : row.rates['сложность'][0]?.rate}
-                                </td>
+                                <RateCeil
+                                    rate={row.rates['сложность'][0]}
+                                    refereeShortName={'C1'}
+                                    declinedRate={declinedRate}
+                                    openPopupChangeRate={changeRate ? setChangeRatePopup : undefined}
+                                    setSelectedRate={setSelectedChangingRate}
+                                    participantId={row.participant_id}
+                                    isDifficulty
+                                />
                                 <td>{row.rates['сложность'][0]?.rate}</td>
                                 <td>
                                     {row.rates['сложность'][0]?.rate
@@ -223,6 +219,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                 })}
                 </tbody>
             </table>
+
             <CompetitionReportPopup
                 active={isReport}
                 setActive={setIsReport}
@@ -230,6 +227,16 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                 nominationWithAgeGroup={reportNominationWithAgeGroup}
                 onClose={() => setReportNominationWithAgeGroup(undefined)}
             />
+
+            {selectedChangingRate && changeRate && (
+                <ParticipantRateEditorPopup
+                    active={changeRatePopup}
+                    setActive={setChangeRatePopup}
+                    selectedRate={selectedChangingRate}
+                    onClose={() => setSelectedChangingRate(undefined)}
+                    changeRate={changeRate}
+                />
+            )}
         </>
     )
 }
@@ -238,5 +245,63 @@ interface Props {
     queue: number
     rows: RatingRow[]
     declinedRate?: (userId: number) => void
+    changeRate?: (payload: ChangeRatePayload) => void
     competitionId: number
+}
+
+export interface ChangeRatePayload {
+    participant_id: number
+    judge_id: number
+    rate: number
+}
+
+function RateCeil({
+    rate,
+    openPopupChangeRate,
+    setSelectedRate,
+    declinedRate,
+    refereeShortName,
+    participantId,
+    isDifficulty,
+}: RateCeilProps) {
+    const select = () => {
+        setSelectedRate({
+            refereeShortName: refereeShortName,
+            rate: rate!,
+            participantId: participantId,
+            isDifficulty,
+        })
+        openPopupChangeRate?.(true)
+    }
+
+    return (
+        <td>
+            {declinedRate && rate && (
+                <Popconfirm
+                    title={`Вы хотите отменить оценку ${refereeShortName}`}
+                    cancelText="Нет"
+                    okText="Да"
+                    onConfirm={() => declinedRate(rate.user_id)}
+                >
+                    <button>{rate.rate}</button>
+                </Popconfirm>
+            )}
+
+            {openPopupChangeRate && rate && (
+                <button onClick={select}>{rate.rate}</button>
+            )}
+
+            {!declinedRate && !openPopupChangeRate && rate && rate.rate}
+        </td>
+    )
+}
+
+interface RateCeilProps {
+    rate: Rate | null
+    refereeShortName: string
+    declinedRate?: (userId: number) => void
+    participantId: number
+    openPopupChangeRate?: (v: boolean) => void
+    setSelectedRate: (v: SelectedChangingRate) => void
+    isDifficulty?: boolean
 }

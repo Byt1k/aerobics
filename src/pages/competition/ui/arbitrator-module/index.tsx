@@ -79,7 +79,6 @@ export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQ
             confirmed: true
         }
 
-
         ws?.send(JSON.stringify(payload))
     }
 
