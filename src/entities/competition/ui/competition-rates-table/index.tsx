@@ -7,6 +7,7 @@ import { useCurrentUser } from '@/entities/user'
 import { svgIcons } from '@/shared/lib/svgIcons'
 import { CompetitionReportPopup } from '../report-popup'
 import { ParticipantRateEditorPopup, SelectedChangingRate } from '../rate-editor-popup'
+import { DeductionsEditorPopup, SelectedChangingDeductions } from '../deductions-editor-popup'
 
 interface LeaderboardItem {
     participantId: number
@@ -18,6 +19,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
     rows,
     declinedRate,
     changeRate,
+    changeDeductions,
     competitionId,
 }) => {
     const currentUser = useCurrentUser()
@@ -73,6 +75,9 @@ export const CompetitionRatesTable: React.FC<Props> = ({
     const [changeRatePopup, setChangeRatePopup] = useState(false)
     const [selectedChangingRate, setSelectedChangingRate] = useState<SelectedChangingRate>()
 
+    const [changeDeductionsPopup, setChangeDeductionsPopup] = useState(false)
+    const [selectedChangingDeductions, setSelectedChangingDeductions] = useState<SelectedChangingDeductions>()
+
     return (
         <>
             <table className={s.table}>
@@ -112,8 +117,8 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                         <p>C</p>
                         <p>Итог</p>
                     </td>
-                    <td>Э</td>
                     <td>Л</td>
+                    <td>Э</td>
                     <td>ГС</td>
                     <td>
                         <p>СБ</p>
@@ -199,9 +204,25 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                     }
                                 </td>
 
-                                <td>{row.deduction_element}</td>
-                                <td>{row.deduction_line}</td>
-                                <td>{row.deduction_judge}</td>
+                                <DeductionCeil
+                                    deduction={row.deduction_line}
+                                    openPopupChangeDeductions={changeDeductions ? setChangeDeductionsPopup : undefined}
+                                    setSelectedDeductions={setSelectedChangingDeductions}
+                                    row={row}
+                                />
+                                <DeductionCeil
+                                    deduction={row.deduction_element}
+                                    openPopupChangeDeductions={changeDeductions ? setChangeDeductionsPopup : undefined}
+                                    setSelectedDeductions={setSelectedChangingDeductions}
+                                    row={row}
+                                />
+                                <DeductionCeil
+                                    deduction={row.deduction_judge}
+                                    openPopupChangeDeductions={changeDeductions ? setChangeDeductionsPopup : undefined}
+                                    setSelectedDeductions={setSelectedChangingDeductions}
+                                    row={row}
+                                />
+
                                 <td>
                                     {totalDeductions(row)}
                                 </td>
@@ -237,6 +258,16 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                     changeRate={changeRate}
                 />
             )}
+
+            {selectedChangingDeductions && changeDeductions && (
+                <DeductionsEditorPopup
+                    active={changeDeductionsPopup}
+                    setActive={setChangeDeductionsPopup}
+                    selectedDeductions={selectedChangingDeductions}
+                    changeDeductions={changeDeductions}
+                    onClose={() => setSelectedChangingDeductions(undefined)}
+                />
+            )}
         </>
     )
 }
@@ -246,6 +277,7 @@ interface Props {
     rows: RatingRow[]
     declinedRate?: (userId: number) => void
     changeRate?: (payload: ChangeRatePayload) => void
+    changeDeductions?: (payload: ChangeDeductionsPayload) => void
     competitionId: number
 }
 
@@ -253,6 +285,23 @@ export interface ChangeRatePayload {
     participant_id: number
     judge_id: number
     rate: number
+}
+
+export interface ChangeDeductionsPayload {
+    participant_id: number
+    deduction_line: number,
+    deduction_element: number
+    deduction_judge: number
+}
+
+interface RateCeilProps {
+    rate: Rate | null
+    refereeShortName: string
+    declinedRate?: (userId: number) => void
+    participantId: number
+    openPopupChangeRate?: (v: boolean) => void
+    setSelectedRate: (v: SelectedChangingRate) => void
+    isDifficulty?: boolean
 }
 
 function RateCeil({
@@ -296,12 +345,36 @@ function RateCeil({
     )
 }
 
-interface RateCeilProps {
-    rate: Rate | null
-    refereeShortName: string
-    declinedRate?: (userId: number) => void
-    participantId: number
-    openPopupChangeRate?: (v: boolean) => void
-    setSelectedRate: (v: SelectedChangingRate) => void
-    isDifficulty?: boolean
+interface DeductionCeilProps {
+    deduction: number | null
+    openPopupChangeDeductions?: (v: boolean) => void
+    row: RatingRow
+    setSelectedDeductions: (v: SelectedChangingDeductions) => void
+}
+
+function DeductionCeil({
+    deduction,
+    row,
+    setSelectedDeductions,
+    openPopupChangeDeductions,
+}: DeductionCeilProps) {
+    const select = () => {
+        setSelectedDeductions({
+            participantId: row.participant_id,
+            line: row.deduction_line!.toString(),
+            element: row.deduction_element!.toString(),
+            mainJudge: row.deduction_judge!.toString(),
+        })
+        openPopupChangeDeductions?.(true)
+    }
+
+    return (
+        <td>
+            {openPopupChangeDeductions && deduction !== null && (
+                <button onClick={select}>{deduction}</button>
+            )}
+
+            {!openPopupChangeDeductions && deduction}
+        </td>
+    )
 }

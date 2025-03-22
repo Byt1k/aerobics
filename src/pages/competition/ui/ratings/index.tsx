@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useWebSocket, RatingRowsByBrigades } from '@/kernel/ws'
 import { Competition, CompetitionRatesTable } from '@/entities/competition'
 import { useCurrentUser } from '@/entities/user'
+import { toast } from 'react-toastify'
 
 const CompetitionRatings: React.FC<Props> = ({ competition }) => {
     const { ws } = useWebSocket(competition.id)
@@ -13,12 +14,22 @@ const CompetitionRatings: React.FC<Props> = ({ competition }) => {
 
         ws.onmessage = (e) => {
             console.log(JSON.parse(e.data))
-            const data = JSON.parse(e.data).rating_rows_by_brigades as RatingRowsByBrigades
-            setTableData(data)
+            const data = JSON.parse(e.data) // as { rating_rows_by_brigades: RatingRowsByBrigades } | WebSocketError
+
+            if (data.error) {
+                toast.error(data.error)
+                return
+            }
+
+            setTableData(data.rating_rows_by_brigades)
         }
     }, [ws])
 
     const changeRate = (payload: ChangeRatePayload) => {
+        ws?.send(JSON.stringify(payload))
+    }
+
+    const changeDeductions = (payload: ChangeDeductionsPayload) => {
         ws?.send(JSON.stringify(payload))
     }
 
@@ -31,6 +42,7 @@ const CompetitionRatings: React.FC<Props> = ({ competition }) => {
                     rows={rows}
                     competitionId={competition.id}
                     changeRate={currentUser.is_admin ? changeRate : undefined}
+                    changeDeductions={changeDeductions}
                 />
             ))}
         </div>
@@ -47,4 +59,11 @@ interface ChangeRatePayload {
     participant_id: number
     judge_id: number
     rate: number
+}
+
+interface ChangeDeductionsPayload {
+    participant_id: number
+    deduction_line: number,
+    deduction_element: number
+    deduction_judge: number
 }
