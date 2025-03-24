@@ -8,6 +8,7 @@ import { svgIcons } from '@/shared/lib/svgIcons'
 import { CompetitionReportPopup } from '../report-popup'
 import { ParticipantRateEditorPopup, SelectedChangingRate } from '../rate-editor-popup'
 import { DeductionsEditorPopup, SelectedChangingDeductions } from '../deductions-editor-popup'
+import { roundToDecimal } from '@/shared/lib/roundToDecimal'
 
 interface LeaderboardItem {
     participantId: number
@@ -38,7 +39,8 @@ export const CompetitionRatesTable: React.FC<Props> = ({
             return acc + rate
         }, 0)
 
-        return (sum - Math.max(...rateValues) - Math.min(...rateValues)) / 2
+        const res =  (sum - Math.max(...rateValues) - Math.min(...rateValues)) / 2
+        return roundToDecimal(res)
     }
 
     const totalDeductions = (row: RatingRow) => {
@@ -91,15 +93,15 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                     <td colSpan={5}>Артистичность</td>
                     <td colSpan={3}>Сложность</td>
                     <td colSpan={4}>Сбавки арбитра</td>
-                    <td rowSpan={2}>Общий балл</td>
-                    <td rowSpan={2}>Место</td>
+                    <td rowSpan={2} className="font-bold">Общий балл</td>
+                    <td rowSpan={2} className="font-bold">Место</td>
                 </tr>
                 <tr>
                     <td className="text-center">И1</td>
                     <td>И2</td>
                     <td>И3</td>
                     <td>И4</td>
-                    <td>
+                    <td className="font-bold">
                         <p>И</p>
                         <p>Итог</p>
                     </td>
@@ -107,20 +109,20 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                     <td>А2</td>
                     <td>А3</td>
                     <td>А4</td>
-                    <td>
+                    <td className="font-bold">
                         <p>А</p>
                         <p>Итог</p>
                     </td>
                     <td>C1</td>
                     <td>C2</td>
-                    <td>
+                    <td className="font-bold">
                         <p>C</p>
                         <p>Итог</p>
                     </td>
                     <td>Л</td>
                     <td>Э</td>
                     <td>ГС</td>
-                    <td>
+                    <td className="font-bold">
                         <p>СБ</p>
                         <p>Итог</p>
                     </td>
@@ -172,7 +174,9 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                         participantId={row.participant_id}
                                     />
                                 ))}
-                                <td>{totalExecutionOrArtistry(row.rates['исполнение'])}</td>
+                                <td className="font-bold">
+                                    {totalExecutionOrArtistry(row.rates['исполнение'])}
+                                </td>
 
                                 {row.rates['артистичность'].map((rate, i) => (
                                     <RateCeil
@@ -185,7 +189,9 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                         participantId={row.participant_id}
                                     />
                                 ))}
-                                <td>{totalExecutionOrArtistry(row.rates['артистичность'])}</td>
+                                <td className="font-bold">
+                                    {totalExecutionOrArtistry(row.rates['артистичность'])}
+                                </td>
 
                                 <RateCeil
                                     rate={row.rates['сложность'][0]}
@@ -197,7 +203,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                     isDifficulty
                                 />
                                 <td>{row.rates['сложность'][0]?.rate}</td>
-                                <td>
+                                <td className="font-bold">
                                     {row.rates['сложность'][0]?.rate
                                         ? row.rates['сложность'][0]?.rate / 2
                                         : null
@@ -223,14 +229,14 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                     row={row}
                                 />
 
-                                <td>
+                                <td className="font-bold">
                                     {totalDeductions(row)}
                                 </td>
 
-                                <td>
+                                <td className="font-bold">
                                     {calculateTotalRate(row)}
                                 </td>
-                                <td>
+                                <td className="font-bold">
                                     {row.confirmed && leaderboard
                                         .findIndex(p => p.participantId === row.participant_id)! + 1}
                                 </td>
