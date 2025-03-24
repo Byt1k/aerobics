@@ -159,7 +159,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                     { [s.current]: rows[rowIndex - 1]?.confirmed && !row.confirmed },
                                     { [s.confirmed]: row.confirmed },
                                 )}>
-                                <td>
+                                <td className="max-w-[200px]">
                                     {row.participant.names}
                                 </td>
 
