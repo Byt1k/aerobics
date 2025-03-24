@@ -4,6 +4,7 @@ import { Competition, getUsersByCompetition, setUserToCompetition, unsetUserByCo
 import s from './index.module.scss'
 import Select, { SelectOptionType } from '@/shared/ui/select'
 import { toast } from 'react-toastify'
+import { v4 as uuid } from 'uuid'
 
 const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }) => {
     const [allUsers, setAllUsers] = useState<UserType[]>([])
@@ -21,27 +22,27 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                 const result: State = {}
 
                 for (let q = 1; q <= competition.queues_amount; q++) {
-                    const arr1 = Array(4).fill({
-                        id: null,
-                        roleId: userRolesList['исполнение судья'],
+                    result[q] = []
+
+                    const referees1 = [userRolesList['исполнение судья'], userRolesList['артистичность судья']]
+                    referees1.forEach(roleId => {
+                        for (let i = 0; i < 4; i++) {
+                            result[q].push({
+                                id: null,
+                                roleId: roleId,
+                                fieldId: uuid(),
+                            })
+                        }
                     })
 
-                    const arr2 = Array(4).fill({
-                        id: null,
-                        roleId: userRolesList['артистичность судья'],
+                    const referees2 = [userRolesList['сложность судья'], userRolesList['арбитр']]
+                    referees2.forEach(roleId => {
+                        result[q].push({
+                            id: null,
+                            roleId: roleId,
+                            fieldId: uuid(),
+                        })
                     })
-
-                    const arr3 = Array(1).fill({
-                        id: null,
-                        roleId: userRolesList['сложность судья'],
-                    })
-
-                    const arr4 = Array(1).fill({
-                        id: null,
-                        roleId: userRolesList['арбитр'],
-                    })
-
-                    result[q] = arr1.concat(arr2).concat(arr3).concat(arr4)
                 }
 
                 for (const user of response) {
@@ -51,10 +52,13 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                         const queue = user.queue_index
                         const index = result[queue].findIndex(u => u.roleId === user.role.id && !u.id)
                         result[queue].slice(index, 1)
-                        result[queue].splice(index, 1, { roleId: user.role.id, id: user.id})
+                        result[queue].splice(index, 1, {
+                            roleId: user.role.id,
+                            id: user.id,
+                            fieldId: uuid(),
+                        })
                     }
                 }
-
                 setState(result)
             }
             setUsersByCompetitionList(response)
@@ -139,6 +143,18 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
         }
     }
 
+    const deleteUserByCompetition = async (userId: string) => {
+        try {
+            await unsetUserByCompetition(+userId, competition.id)
+            fetchUsersByCompetition()
+            toast.success('Сохранено')
+        } catch {
+            toast.error('Что-то пошло нет так')
+        }
+    }
+
+    console.log(state)
+
     return (
         <div className="flex flex-col gap-5">
             <div className="w-[500px]">
@@ -148,7 +164,7 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                     value={mainRefereeUserId?.toString()}
                     onChange={userId => userByCompetitionOnChange({
                         prevUserId: mainRefereeUserId ?? undefined,
-                        userId: +userId,
+                        userId: +userId!,
                         roleId: userRolesList['главный судья'],
                     })}
                 />
@@ -158,17 +174,19 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                     <div className={s.teem} key={queue}>
                         <h3>Бригада {queue}</h3>
                         {users.map((user, userIndex) => (
-                            <div key={userIndex} className={s.item}>
+                            <div key={user.fieldId} className={s.item}>
                                 <Select
                                     options={getFreeUsersWithCurrent(user.id ?? 0)}
-                                    value={state[+queue][userIndex].id?.toString()}
+                                    value={user.id?.toString()}
                                     onChange={userId => userByCompetitionOnChange({
-                                        prevUserId: state[+queue][userIndex].id || undefined,
-                                        userId: +userId,
-                                        roleId: state[+queue][userIndex].roleId,
+                                        prevUserId: user.id || undefined,
+                                        userId: +userId!,
+                                        roleId: user.roleId,
                                         queueIndex: +queue,
                                         userIndex: userIndex,
                                     })}
+                                    allowClear
+                                    onClear={deleteUserByCompetition}
                                 />
                                 <Select
                                     options={roles
@@ -197,6 +215,7 @@ type State = Record<number, UserByState[]>
 interface UserByState {
     id: number | null
     roleId: UserRoleId
+    fieldId: string
 }
 
 interface UserByCompetitionPayload {

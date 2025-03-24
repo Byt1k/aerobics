@@ -90,7 +90,7 @@ export const CompetitionEditorPopup: React.FC<Props> = ({ active, setActive, sel
                         label="Количество судейских бригад"
                         options={[{ value: '1', label: '1' }, { value: '2', label: '2' }]}
                         value={formState.queues_amount.toString()}
-                        onChange={v => changeFormState('queues_amount', +v)}
+                        onChange={v => changeFormState('queues_amount', +v!)}
                     />
                     <Button type="submit" disabled={isPending} className={s.btn}>
                         {`${selected ? 'Редактировать' : 'Создать'} соревнование`}

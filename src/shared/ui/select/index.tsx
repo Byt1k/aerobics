@@ -15,6 +15,8 @@ const Select: React.FC<Props> = ({
     name,
     disabled,
     locked,
+    allowClear,
+    onClear,
 }) => {
     const { ref, active, setActive } = useClickOutside()
 
@@ -24,8 +26,8 @@ const Select: React.FC<Props> = ({
         setValue(defaultValue ?? '')
     }, [defaultValue])
 
-    const handleOnChange = (value: string) => {
-        setValue(value)
+    const handleOnChange = (value: string | undefined) => {
+        setValue(value ?? '')
         onChange?.(value)
         setActive(false)
     }
@@ -53,9 +55,21 @@ const Select: React.FC<Props> = ({
                         options?.find(item => item.value === value)?.label
                     )}
 
-                    <i className={classNames(s.icon, s.dropdownIcon)}>
-                        {svgIcons.dropdown}
-                    </i>
+                    {allowClear && !!value ? (
+                        <button
+                            className={s.icon}
+                            onClick={() => {
+                                handleOnChange(undefined)
+                                onClear?.(value)
+                            }}
+                        >
+                            {svgIcons.close}
+                        </button>
+                    ) : (
+                        <i className={classNames(s.icon, s.dropdownIcon)}>
+                            {svgIcons.dropdown}
+                        </i>
+                    )}
 
                 </div>
 
@@ -87,12 +101,14 @@ interface Props {
     isError?: boolean
     errorMessage?: string
     value?: string
-    onChange?: (value: string) => void
+    onChange?: (value: string | undefined) => void
     locked?: boolean
     className?: string
     options: SelectOptionType[]
     name?: string
     disabled?: boolean
+    allowClear?: boolean
+    onClear?: (v: string) => void
 }
 
 export interface SelectOptionType {
