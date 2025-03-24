@@ -10,6 +10,7 @@ export { unsetUserByCompetition } from './actions/unset-user-by-competition'
 export { getUserRoleAndQueue } from './actions/get-user-role-and-queue'
 export type { UserRoleAndQueueByCompetition } from './actions/get-user-role-and-queue'
 export { moveParticipant } from './actions/move-participant'
+export { moveNomination } from './actions/move-nomination'
 export { deleteCompetitionParticipant } from './actions/delete-participant'
 
 export { CompetitionEditorPopup } from './ui/editor-popup'

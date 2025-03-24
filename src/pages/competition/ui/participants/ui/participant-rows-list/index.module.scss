@@ -1,8 +1,8 @@
-.participant {
-  &.draggable {
-    cursor: grab;
-  }
+.draggable {
+  cursor: grab;
+}
 
+.participant {
   .delete {
     display: block;
     margin-left: auto;
