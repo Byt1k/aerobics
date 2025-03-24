@@ -21,6 +21,8 @@ export const UploadParticipants: React.FC<Props> = ({ fetchParticipants, competi
     }
 
     const upload = (isShuffle: boolean) => {
+        setActive(false)
+
         startTransition(async () => {
             if (!fileRef.current) {
                 return
@@ -33,8 +35,6 @@ export const UploadParticipants: React.FC<Props> = ({ fetchParticipants, competi
             } catch {
                 toast.error('Не удалось загрузить данные')
             } finally {
-                setActive(false)
-
                 if (uploadInputRef.current) {
                     uploadInputRef.current.value = ''
                 }

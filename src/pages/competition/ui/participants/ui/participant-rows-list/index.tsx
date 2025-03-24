@@ -71,20 +71,20 @@ export const ParticipantRowsList: React.FC<Props> = ({
     const handleDragOver: DragEventHandler<HTMLTableRowElement> = (e) => {
         e.preventDefault()
         // @ts-ignore
-        e.target.parentElement.style.background = '#d6ffd6'
+        e.target.closest('tr').style.background = '#d6ffd6'
     }
 
     const handleDragLeave: DragEventHandler<HTMLTableRowElement> = (e) => {
         // @ts-ignore
-        e.target.parentElement.style.background = '#fff'
+        e.target.closest('tr').style.background = '#fff'
     }
 
     const handleDrop: DragEventHandler<HTMLTableRowElement> = (e) => {
         const dragOrder = e.dataTransfer.getData('text/plain')
         // @ts-ignore
-        const dropOrder = e.target.parentElement.dataset.order
+        const dropOrder = e.target.closest('tr').dataset.order
         // @ts-ignore
-        e.target.parentElement.style.background = '#fff'
+        e.target.closest('tr').style.background = '#fff'
 
         if (dragOrder === dropOrder) return
 
