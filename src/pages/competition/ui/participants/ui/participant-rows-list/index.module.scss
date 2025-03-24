@@ -17,4 +17,19 @@
       stroke: #b3b3b3;
     }
   }
+
+  .nameEditBtn {
+    min-width: 20px;
+    width: 20px;
+    height: 20px;
+
+    > svg {
+      max-width: 100%;
+      max-height: 100%;
+
+      path {
+        stroke: #767676;
+      }
+    }
+  }
 }

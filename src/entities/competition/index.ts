@@ -16,6 +16,7 @@ export { CompetitionEditorPopup } from './ui/editor-popup'
 export { UploadParticipantsInput } from './ui/upload-participants-input'
 export { CompetitionRatesTable } from './ui/competition-rates-table'
 export { CompetitionReportPopup } from './ui/report-popup'
+export { ParticipantNameEditorPopup } from './ui/participant-name-editor-popup'
 
 export type { Competition, Participant } from './model/types'
 export { competitionStatuses } from './model/types'

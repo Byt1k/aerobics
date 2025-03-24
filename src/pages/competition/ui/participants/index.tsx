@@ -4,6 +4,7 @@ import {
     Participant,
     getParticipantsList,
     UploadParticipantsInput,
+    ParticipantNameEditorPopup,
 } from '@/entities/competition'
 import tableStyles from '@/shared/ui/table/index.module.scss'
 import { ParticipantRowsList } from './ui/participant-rows-list'
@@ -55,6 +56,14 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
         fetchParticipants()
     }, [])
 
+    const [nameEditorOpened, setNameEditorOpened] = useState(false)
+    const [selectedParticipant, setSelectedParticipant] = useState<Participant>()
+
+    const openParticipantNameEditor = (participant: Participant) => {
+        setSelectedParticipant(participant)
+        setNameEditorOpened(true)
+    }
+
     return (
         <div>
             <div className="flex items-center justify-between mb-4 gap-5">
@@ -100,11 +109,21 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
                                 competitionId={competition.id}
                                 participants={tableState[queue]}
                                 fetchParticipants={fetchParticipants}
+                                openParticipantNameEditor={openParticipantNameEditor}
                             />
                         </tbody>
                     </table>
                 ))}
             </div>
+
+            {selectedParticipant && (
+                <ParticipantNameEditorPopup
+                    active={nameEditorOpened}
+                    setActive={setNameEditorOpened}
+                    participant={selectedParticipant}
+                    updateParticipants={fetchParticipants}
+                />
+            )}
         </div>
     )
 }

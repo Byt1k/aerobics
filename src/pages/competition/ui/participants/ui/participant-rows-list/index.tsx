@@ -12,6 +12,7 @@ export const ParticipantRowsList: React.FC<Props> = ({
     competitionId,
     participants,
     fetchParticipants,
+    openParticipantNameEditor,
 }) => {
     const [isDeleting, startDeleting] = useTransition()
 
@@ -110,7 +111,19 @@ export const ParticipantRowsList: React.FC<Props> = ({
                 onDrop={handleDrop}
             >
                 <td>{participant.order_num}</td>
-                <td className="whitespace-pre-wrap">{participant.names}</td>
+                <td className="whitespace-pre-wrap">
+                    <div className="flex gap-3">
+                        {participant.names}
+                        {!participant.confirmed && (
+                            <button
+                                className={s.nameEditBtn}
+                                onClick={() => openParticipantNameEditor(participant)}
+                            >
+                                {svgIcons.edit}
+                            </button>
+                        )}
+                    </div>
+                </td>
                 <td>{`${participant.country}, ${participant.city}`}</td>
                 <td>
                     {!participant.confirmed && (
@@ -138,4 +151,5 @@ interface Props {
     participants: Participant[]
     competitionId: number
     fetchParticipants: () => Promise<void>
+    openParticipantNameEditor: (v: Participant) => void
 }
