@@ -13,10 +13,11 @@ export { moveParticipant } from './actions/move-participant'
 export { deleteCompetitionParticipant } from './actions/delete-participant'
 
 export { CompetitionEditorPopup } from './ui/editor-popup'
-export { UploadParticipantsInput } from './ui/upload-participants-input'
+export { UploadParticipants } from './ui/upload-participants'
 export { CompetitionRatesTable } from './ui/competition-rates-table'
 export { CompetitionReportPopup } from './ui/report-popup'
 export { ParticipantNameEditorPopup } from './ui/participant-name-editor-popup'
+export { DownloadParticipants } from './ui/download-participants'
 
 export type { Competition, Participant } from './model/types'
 export { competitionStatuses } from './model/types'

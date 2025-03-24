@@ -3,13 +3,15 @@ import {
     Competition,
     Participant,
     getParticipantsList,
-    UploadParticipantsInput,
+    UploadParticipants,
     ParticipantNameEditorPopup,
+    DownloadParticipants,
 } from '@/entities/competition'
 import tableStyles from '@/shared/ui/table/index.module.scss'
 import { ParticipantRowsList } from './ui/participant-rows-list'
 
 const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
+    const [isPending, setIsPending] = useState(true)
     const [list, setList] = useState<Participant[]>([])
     const [tableState, setTableState] = useState<ParticipantsTable>({})
     const [nominations, setNominations] = useState<string[]>([])
@@ -17,6 +19,8 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
     const [cities, setCities] = useState<string[]>([])
 
     const fetchParticipants = async () => {
+        setIsPending(true)
+
         const result: ParticipantsTable = {} as ParticipantsTable
 
         const uniqQueues = new Set<number>()
@@ -49,6 +53,8 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
             setCities(Array.from(uniqCities))
         } catch {
             //
+        } finally {
+            setIsPending(false)
         }
     }
 
@@ -66,30 +72,41 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-4 gap-5">
+            <div className="flex items-center mb-4 gap-5">
                 <h2>Участники</h2>
 
-                {competition.status === 'not_started' && (
-                    <UploadParticipantsInput
-                        competitionId={competition.id}
-                        fetchParticipants={fetchParticipants}
-                        className="ml-auto"
-                    />
-                )}
-                {!!Object.getOwnPropertyNames(tableState || {}).length && (
-                    <div className="flex gap-3">
-                        <div className="flex flex-col gap-1 bg-white p-3 rounded">
-                            <p>Номинаций</p>
-                            <h2>{nominations.length}</h2>
-                        </div>
-                        <div className="flex flex-col gap-1 bg-white p-3 rounded">
-                            <p>Участников</p>
-                            <h2>{list.length}</h2>
-                        </div>
-                        <div className="flex flex-col gap-1 bg-white p-3 rounded">
-                            <p>Городов/Школ</p>
-                            <h2>{cities.length}</h2>
-                        </div>
+                {isPending ? (
+                    <p className="ml-auto">Загрузка...</p>
+                ) : (
+                    <div className="ml-auto flex items-center gap-5">
+                        {competition.status === 'not_started' && (
+                            <UploadParticipants
+                                competitionId={competition.id}
+                                fetchParticipants={fetchParticipants}
+                                isUpload={Object.values(tableState)?.some(participants => participants.length)}
+                            />
+                        )}
+
+                        {Object.values(tableState)?.some(participants => participants.length) && (
+                            <DownloadParticipants competitionId={competition.id} />
+                        )}
+
+                        {!!Object.getOwnPropertyNames(tableState || {}).length && (
+                            <div className="flex gap-3">
+                                <div className="flex flex-col gap-1 bg-white p-3 rounded">
+                                    <p>Номинаций</p>
+                                    <h2>{nominations.length}</h2>
+                                </div>
+                                <div className="flex flex-col gap-1 bg-white p-3 rounded">
+                                    <p>Участников</p>
+                                    <h2>{list.length}</h2>
+                                </div>
+                                <div className="flex flex-col gap-1 bg-white p-3 rounded">
+                                    <p>Городов/Школ</p>
+                                    <h2>{cities.length}</h2>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -98,19 +115,19 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
                 {queues.map(queue => (
                     <table className={tableStyles.table} key={queue}>
                         <thead>
-                            <tr>
-                                <td colSpan={4} className="text-center">
-                                    <h3>Бригада {queue}</h3>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colSpan={4} className="text-center">
+                                <h3>Бригада {queue}</h3>
+                            </td>
+                        </tr>
                         </thead>
                         <tbody>
-                            <ParticipantRowsList
-                                competitionId={competition.id}
-                                participants={tableState[queue]}
-                                fetchParticipants={fetchParticipants}
-                                openParticipantNameEditor={openParticipantNameEditor}
-                            />
+                        <ParticipantRowsList
+                            competitionId={competition.id}
+                            participants={tableState[queue]}
+                            fetchParticipants={fetchParticipants}
+                            openParticipantNameEditor={openParticipantNameEditor}
+                        />
                         </tbody>
                     </table>
                 ))}
