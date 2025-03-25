@@ -1,12 +1,28 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { getRoles, getUsersList, UserRole, UserType, UserByCompetition, userRolesList, UserRoleId } from '@/entities/user'
-import { Competition, getUsersByCompetition, setUserToCompetition, unsetUserByCompetition } from '@/entities/competition'
+import {
+    getRoles,
+    getUsersList,
+    UserRole,
+    UserType,
+    UserByCompetition,
+    userRolesList,
+    UserRoleId,
+    useCurrentUser,
+} from '@/entities/user'
+import {
+    Competition,
+    getUsersByCompetition,
+    setUserToCompetition,
+    unsetUserByCompetition,
+} from '@/entities/competition'
 import s from './index.module.scss'
 import Select, { SelectOptionType } from '@/shared/ui/select'
 import { toast } from 'react-toastify'
 import { v4 as uuid } from 'uuid'
 
 const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }) => {
+    const currentUser = useCurrentUser()
+
     const [allUsers, setAllUsers] = useState<UserType[]>([])
     const [usersByCompetitionList, setUsersByCompetitionList] = useState<UserByCompetition[]>([])
     const [roles, setRoles] = useState<UserRole[]>([])
@@ -79,13 +95,15 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
         fetchUsersByCompetition()
     }, [])
 
-    const getFreeUsersWithCurrent = useCallback((currentUserId: number): SelectOptionType[] => {
+    const getFreeUsersWithSelected = useCallback((selectedUserId: number): SelectOptionType[] => {
         const freeUsers =  allUsers
-            .filter(user => !usersByCompetitionList
-                .some(userByCompetition => userByCompetition.id === user.id && userByCompetition.id !== currentUserId)
+            .filter(user => user.id !== currentUser.id &&
+                !usersByCompetitionList.some(userByCompetition =>
+                    userByCompetition.id === user.id && userByCompetition.id !== selectedUserId
+                )
             )
         return freeUsers.map(user => ({ value: user.id.toString(), label: user.username }))
-    }, [allUsers, usersByCompetitionList])
+    }, [allUsers, usersByCompetitionList, currentUser])
 
     const userByCompetitionOnChange = async ({ prevUserId, userId, roleId, queueIndex, userIndex }: UserByCompetitionPayload) => {
         if (userId && !roleId && queueIndex) {
@@ -159,7 +177,7 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
         <div className="flex flex-col gap-5">
             <div className="w-[500px]">
                 <Select
-                    options={getFreeUsersWithCurrent(mainRefereeUserId ?? 0)}
+                    options={getFreeUsersWithSelected(mainRefereeUserId ?? 0)}
                     label="Главный судья"
                     value={mainRefereeUserId?.toString()}
                     onChange={userId => userByCompetitionOnChange({
@@ -176,7 +194,7 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                         {users.map((user, userIndex) => (
                             <div key={user.fieldId} className={s.item}>
                                 <Select
-                                    options={getFreeUsersWithCurrent(user.id ?? 0)}
+                                    options={getFreeUsersWithSelected(user.id ?? 0)}
                                     value={user.id?.toString()}
                                     onChange={userId => userByCompetitionOnChange({
                                         prevUserId: user.id || undefined,
