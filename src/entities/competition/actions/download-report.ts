@@ -34,6 +34,7 @@ interface Params {
     date_string: string
     main_judge: string
     main_secretary: string
+    place: string
     nomination?: string
     age_group?: string
 }

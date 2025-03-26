@@ -9,6 +9,7 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
     const [date, setDate] = useState('')
     const [mainJudge, setMainJudge] = useState('')
     const [mainSecretary, setMainSecretary] = useState('')
+    const [place, setPlace] = useState('')
 
     const [isPending, startTransition] = useTransition()
 
@@ -24,12 +25,13 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
                     date_string: date,
                     main_judge: mainJudge,
                     main_secretary: mainSecretary,
+                    place: place,
                     nomination: nomination,
                     age_group: ageGroup,
                 })
                 setActive(false)
-            } catch {
-                toast.error('Не удалось сформировать отчет')
+            } catch (e: any) {
+                toast.error(`Не удалось сформировать отчет (status: ${e?.status})`)
             }
         })
     }
@@ -38,6 +40,7 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
         setDate('')
         setMainJudge('')
         setMainSecretary('')
+        setPlace('')
     }
 
     useEffect(() => {
@@ -58,19 +61,30 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
                         label="Дата соревнования"
                         value={date}
                         onChange={setDate}
+                        required
+                    />
+                    <Input
+                        label="Место проведения"
+                        value={place}
+                        onChange={setPlace}
+                        required
                     />
                     <Input
                         label="Главный судья"
                         value={mainJudge}
                         onChange={setMainJudge}
+                        required
                     />
                     <Input
                         label="Секретарь"
                         value={mainSecretary}
                         onChange={setMainSecretary}
+                        required
                     />
                     <div className="grid grid-cols-2 gap-4">
-                        <Button className="w-full" disabled={isPending} type="submit">Скачать</Button>
+                        <Button className="w-full" disabled={isPending} type="submit">
+                            Скачать
+                        </Button>
                         <Button
                             className="w-full"
                             variant="transparent"
