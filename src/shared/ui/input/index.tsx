@@ -2,6 +2,7 @@ import React, { HTMLInputTypeAttribute, HTMLProps, useState } from 'react'
 import classNames from 'classnames'
 import s from './index.module.scss'
 import { svgIcons } from '../../lib/svgIcons'
+import { validateNumber } from '../../lib/number-validation-schema'
 
 const Input: React.FC<Props> = ({
     label,
@@ -16,6 +17,14 @@ const Input: React.FC<Props> = ({
 }) => {
     const [showPassword, setShowPassword] = useState(false)
 
+    const handleChangeValue = (value: string) => {
+        if (type === 'number') {
+            onChange?.(validateNumber(value))
+        } else {
+            onChange?.(value)
+        }
+    }
+
     return (
         <div
             className={classNames(
@@ -29,7 +38,7 @@ const Input: React.FC<Props> = ({
                 <input
                     type={!showPassword && isPassword ? 'password' : type}
                     value={value}
-                    onChange={e => onChange?.(e.target.value)}
+                    onChange={e => handleChangeValue(e.target.value)}
                     {...rest}
                 />
                 {isPassword && (

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useTransition } from 'react'
 import Button from '@/shared/ui/button'
 import Table, { TableColumns } from '@/shared/ui/table'
 import s from './index.module.scss'
@@ -13,8 +13,12 @@ export const CompetitionsListPage = () => {
     const currentUser = useCurrentUser()
     const [competitionsList, setCompetitionsList] = useState<Competition[]>([])
 
+    const [isPending, startTransition] = useTransition()
+
     const getCompetitions = () => {
-        getCompetitionsList().then(res => setCompetitionsList(res))
+       startTransition(async () => {
+           await getCompetitionsList().then(res => setCompetitionsList(res))
+       })
     }
 
     useEffect(() => {
@@ -126,7 +130,7 @@ export const CompetitionsListPage = () => {
                 )}
             </div>
 
-            <Table<Competition> columns={columns} data={competitionsList} />
+            <Table<Competition> columns={columns} data={competitionsList} loading={isPending} />
 
             <CompetitionEditorPopup
                 active={editorOpened}

@@ -56,6 +56,7 @@ export const ParticipantRateEditorPopup: React.FC<Props> = ({
             onClose={onClose}
             title={'Редактирование оценки ' + refereeShortName}
             content={<Input
+                type="number"
                 label="Оценка"
                 value={value}
                 onChange={setValue}

@@ -4,10 +4,9 @@ import Input from '@/shared/ui/input'
 import { UserRoleAndQueueByCompetition, Competition } from '@/entities/competition'
 import Button from '@/shared/ui/button'
 import { useWebSocket, RatingRow, RatingRowsByBrigades, Rate } from '@/kernel/ws'
-import { useCurrentUser } from '@/entities/user'
+import { useCurrentUser, userRolesList } from '@/entities/user'
 import { toast } from 'react-toastify'
 import classNames from 'classnames'
-import { userRolesList } from '../../../../entities/user'
 
 export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competition }) => {
     const currentUser = useCurrentUser()
