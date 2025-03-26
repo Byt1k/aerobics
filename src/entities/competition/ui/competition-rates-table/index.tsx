@@ -8,7 +8,6 @@ import { svgIcons } from '@/shared/lib/svgIcons'
 import { CompetitionReportPopup } from '../report-popup'
 import { ParticipantRateEditorPopup, SelectedChangingRate } from '../rate-editor-popup'
 import { DeductionsEditorPopup, SelectedChangingDeductions } from '../deductions-editor-popup'
-import { roundToDecimal } from '@/shared/lib/roundToDecimal'
 
 interface LeaderboardItem {
     participantId: number
@@ -39,8 +38,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
             return acc + rate
         }, 0)
 
-        const res =  (sum - Math.max(...rateValues) - Math.min(...rateValues)) / 2
-        return roundToDecimal(res)
+        return (sum - Math.max(...rateValues) - Math.min(...rateValues)) / 2
     }
 
     const totalDeductions = (row: RatingRow) => {
@@ -175,7 +173,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                     />
                                 ))}
                                 <td className="font-bold">
-                                    {totalExecutionOrArtistry(row.rates['исполнение'])}
+                                    {totalExecutionOrArtistry(row.rates['исполнение'])?.toFixed(2)}
                                 </td>
 
                                 {row.rates['артистичность'].map((rate, i) => (
@@ -190,7 +188,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                     />
                                 ))}
                                 <td className="font-bold">
-                                    {totalExecutionOrArtistry(row.rates['артистичность'])}
+                                    {totalExecutionOrArtistry(row.rates['артистичность'])?.toFixed(2)}
                                 </td>
 
                                 <RateCeil
@@ -234,7 +232,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                 </td>
 
                                 <td className="font-bold">
-                                    {calculateTotalRate(row)}
+                                    {calculateTotalRate(row)?.toFixed(2)}
                                 </td>
                                 <td className="font-bold">
                                     {row.confirmed && leaderboard

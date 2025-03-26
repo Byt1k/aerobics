@@ -34,7 +34,7 @@ const CompetitionRatings: React.FC<Props> = ({ competition }) => {
     }
 
     return (
-        <div className="grid grid-cols-2 gap-3">
+        <div className={`grid grid-cols-${Object.keys(tableData).length} gap-3`}>
             {Object.entries(tableData).map(([queue, rows]) => (
                 <CompetitionRatesTable
                     key={queue}
