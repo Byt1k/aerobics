@@ -11,7 +11,7 @@ export default defineConfig({
             '@': path.resolve(__dirname, 'src'),
         },
     },
-    // esbuild: {
-    //     jsxInject: `import React from 'react'`,
-    // },
+    preview: {
+        allowedHosts: ['aerobic-competition.ru']
+    }
 })
