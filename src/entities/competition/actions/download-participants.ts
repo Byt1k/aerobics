@@ -2,7 +2,7 @@ import { axiosInstance } from '@/kernel/instance'
 import { formatQueryParams } from '@/shared/lib/formatQueryParams'
 
 export const downloadParticipants = async (competition_id: number, protocol_title?: string) => {
-    const response = await axiosInstance.get(`/competitions/api/participant/${competition_id}/to-xlsx` + formatQueryParams({ protocol_title }), {
+    const response = await axiosInstance.get(`/competition-service/api/participant/${competition_id}/to-xlsx` + formatQueryParams({ protocol_title }), {
         responseType: 'blob'
     })
 

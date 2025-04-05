@@ -3,7 +3,7 @@ import { UserRoleId } from '@/entities/user'
 
 export const setUserToCompetition = async ({ competitionId, userId, roleId, queueIndex }: UserToCompetitionPayload) => {
     if (queueIndex) {
-        await axiosInstance.post(`/competitions/api/enqueue/${userId}/${competitionId}/${queueIndex}`)
+        await axiosInstance.post(`/competition-service/api/enqueue/${userId}/${competitionId}/${queueIndex}`)
     }
 
     await axiosInstance.post(`/user-service/api/role/set/${userId}/${roleId}/${competitionId}`)
