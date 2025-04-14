@@ -12,6 +12,7 @@ export type { UserRoleAndQueueByCompetition } from './actions/get-user-role-and-
 export { moveParticipant } from './actions/move-participant'
 export { moveNomination } from './actions/move-nomination'
 export { deleteCompetitionParticipant } from './actions/delete-participant'
+export { startCompetition } from './actions/start-competition'
 
 export { CompetitionEditorPopup } from './ui/editor-popup'
 export { UploadParticipants } from './ui/upload-participants'

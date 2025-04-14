@@ -19,6 +19,8 @@ import { ArbitratorModule } from '../ui/arbitrator-module'
 import Ratings from '../ui/ratings'
 import Button from '@/shared/ui/button'
 import { svgIcons } from '@/shared/lib/svgIcons'
+import { toast } from 'react-toastify'
+import { startCompetition } from '../../../entities/competition'
 
 export const CompetitionPage = () => {
     const { id } = useParams()
@@ -30,14 +32,18 @@ export const CompetitionPage = () => {
 
     const [refereeRoleAndQueue, setRefereeRoleAndQueue] = useState<UserRoleAndQueueByCompetition | null>(null)
 
-    useEffect(() => {
-        if (!id) return
-
-        setIsPending(true)
+    const fetchCompetition = (id: string) => {
         getCompetition(id)
             .then(res => setCompetition(res))
             .catch(() => setCompetition(null))
             .finally(() => setIsPending(false))
+    }
+
+    useEffect(() => {
+        if (!id) return
+
+        setIsPending(true)
+        fetchCompetition(id)
 
         if (currentUser.is_admin) return
 
@@ -45,6 +51,15 @@ export const CompetitionPage = () => {
             .then(res => setRefereeRoleAndQueue(res))
             .catch(() => setRefereeRoleAndQueue(null))
     }, [id])
+
+    const start = async () => {
+        try {
+            await startCompetition(id!)
+            fetchCompetition(id!)
+        } catch {
+            toast.error('Не удалось начать соревнование')
+        }
+    }
 
     if (!competition && isPending) {
         return <div>Загрузка...</div>
@@ -78,14 +93,25 @@ export const CompetitionPage = () => {
                     </Tag>
 
                     {currentUser.is_admin && (
-                        <Button
-                            variant="transparent"
-                            className="ml-auto"
-                            onClick={() => setIsReport(true)}
-                        >
-                            Сформировать отчет
-                            {svgIcons.download}
-                        </Button>
+                        <>
+                            {competition.status === 'not_started' ? (
+                                <Button
+                                    className="ml-auto"
+                                    onClick={start}
+                                >
+                                    Начать соревнование
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="transparent"
+                                    className="ml-auto"
+                                    onClick={() => setIsReport(true)}
+                                >
+                                    Сформировать отчет
+                                    {svgIcons.download}
+                                </Button>
+                            )}
+                        </>
                     )}
 
                     {refereeRoleAndQueue && [userRolesList['арбитр'], userRolesList['главный судья']]
@@ -95,7 +121,7 @@ export const CompetitionPage = () => {
                             <h3 className="ml-auto">{refereeRoleAndQueue.role.title.toUpperCase()}</h3>
                     )}
                 </div>
-                <p>Дата начала: {formatDate(competition.date_start)}</p>
+                {competition.date_start && <p>Дата начала: {formatDate(competition.date_start)}</p>}
             </div>
 
             {currentUser.is_admin && (

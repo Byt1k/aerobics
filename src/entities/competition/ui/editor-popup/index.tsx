@@ -9,12 +9,12 @@ import { updateCompetitionAction } from '../../actions/update-competition'
 import { toast } from 'react-toastify'
 import { createChangeStateHandler } from '@/shared/lib/change-state-handler'
 import Select from '@/shared/ui/select'
-import InputDateTime from '@/shared/ui/date-picker/input-datetime'
+// import InputDateTime from '@/shared/ui/date-picker/input-datetime'
 
 export interface FormState {
     title: string
     stage: string
-    date_start: string | null
+    // date_start: string | null
     queues_amount: number
 }
 
@@ -23,7 +23,7 @@ export const CompetitionEditorPopup: React.FC<Props> = ({ active, setActive, sel
         title: selected?.title ?? '',
         queues_amount: selected?.queues_amount ?? 1,
         stage: selected?.stage ?? '',
-        date_start: selected?.date_start ?? null,
+        // date_start: selected?.date_start ?? null,
     }
 
     const [formState, setFormState] = useState(initialState)
@@ -81,11 +81,11 @@ export const CompetitionEditorPopup: React.FC<Props> = ({ active, setActive, sel
                         value={formState.stage}
                         onChange={v => changeFormState('stage', v)}
                     />
-                    <InputDateTime
-                        label="Дата начала"
-                        value={formState.date_start}
-                        onChange={v => changeFormState('date_start', v)}
-                    />
+                    {/*<InputDateTime*/}
+                    {/*    label="Дата начала"*/}
+                    {/*    value={formState.date_start}*/}
+                    {/*    onChange={v => changeFormState('date_start', v)}*/}
+                    {/*/>*/}
                     <Select
                         label="Количество судейских бригад"
                         options={[{ value: '1', label: '1' }, { value: '2', label: '2' }]}

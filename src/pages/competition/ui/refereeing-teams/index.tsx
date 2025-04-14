@@ -33,34 +33,33 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
     const fetchUsersByCompetition = async () => {
         try {
             const response = await getUsersByCompetition(competition.id)
+            const result: State = {}
 
-            if (response.length) {
-                const result: State = {}
+            for (let q = 1; q <= competition.queues_amount; q++) {
+                result[q] = []
 
-                for (let q = 1; q <= competition.queues_amount; q++) {
-                    result[q] = []
-
-                    const referees1 = [userRolesList['исполнение судья'], userRolesList['артистичность судья']]
-                    referees1.forEach(roleId => {
-                        for (let i = 0; i < 4; i++) {
-                            result[q].push({
-                                id: null,
-                                roleId: roleId,
-                                fieldId: uuid(),
-                            })
-                        }
-                    })
-
-                    const referees2 = [userRolesList['сложность судья'], userRolesList['арбитр']]
-                    referees2.forEach(roleId => {
+                const referees1 = [userRolesList['исполнение судья'], userRolesList['артистичность судья']]
+                referees1.forEach(roleId => {
+                    for (let i = 0; i < 4; i++) {
                         result[q].push({
                             id: null,
                             roleId: roleId,
                             fieldId: uuid(),
                         })
-                    })
-                }
+                    }
+                })
 
+                const referees2 = [userRolesList['сложность судья'], userRolesList['арбитр']]
+                referees2.forEach(roleId => {
+                    result[q].push({
+                        id: null,
+                        roleId: roleId,
+                        fieldId: uuid(),
+                    })
+                })
+            }
+
+            if (response.length) {
                 for (const user of response) {
                     if (user.role.id === userRolesList['главный судья']) {
                         setMainRefereeUserId(user.id)
@@ -75,8 +74,9 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                         })
                     }
                 }
-                setState(result)
             }
+
+            setState(result)
             setUsersByCompetitionList(response)
         } catch {
             //
@@ -170,8 +170,6 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
             toast.error('Что-то пошло нет так')
         }
     }
-
-    console.log(state)
 
     return (
         <div className="flex flex-col gap-5">

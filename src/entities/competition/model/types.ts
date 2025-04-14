@@ -1,6 +1,5 @@
 export const competitionStatuses = {
     not_started: "Ожидается",
-    unrated: "Ожидается", // до сегодняшнего дня включительно и без оценок
     ongoing: "Проходит",
     finished: "Завершено",
 }
@@ -10,7 +9,7 @@ type CompetitionStatus = keyof typeof competitionStatuses
 export interface Competition {
     title: string
     stage: string
-    date_start: string
+    date_start: string | null
     queues_amount: number
     status: CompetitionStatus
     id: number
