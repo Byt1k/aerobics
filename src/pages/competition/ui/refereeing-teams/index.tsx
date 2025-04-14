@@ -154,7 +154,7 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                 roleId, userId, competitionId: competition.id, queueIndex
             })
 
-            fetchUsersByCompetition()
+            // fetchUsersByCompetition()
             toast.success('Сохранено')
         } catch {
             toast.error('Что-то пошло нет так')
@@ -185,6 +185,7 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                         userId: +userId!,
                         roleId: userRolesList['главный судья'],
                     })}
+                    search
                 />
             </div>
             <div className="flex gap-4">
@@ -205,6 +206,7 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
                                     })}
                                     allowClear
                                     onClear={deleteUserByCompetition}
+                                    search
                                 />
                                 <Select
                                     options={roles

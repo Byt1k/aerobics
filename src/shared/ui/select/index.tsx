@@ -17,10 +17,12 @@ const Select: React.FC<Props> = ({
     locked,
     allowClear,
     onClear,
+    search,
 }) => {
     const { ref, active, setActive } = useClickOutside()
 
     const [value, setValue] = useState(defaultValue ?? '')
+    const [searchValue, setSearchvalue] = useState('')
 
     useEffect(() => {
         setValue(defaultValue ?? '')
@@ -28,9 +30,11 @@ const Select: React.FC<Props> = ({
 
     const handleOnChange = (value: string | undefined) => {
         setValue(value ?? '')
+        setSearchvalue('')
         onChange?.(value)
         setActive(false)
     }
+
 
     return (
         <div className={classNames(s.wrapper, className)}>
@@ -49,11 +53,13 @@ const Select: React.FC<Props> = ({
                 ref={ref}
             >
                 <div className={s.value} onClick={() => setActive(prev => !prev)}>
-                    {!value ? (
-                        <span className={s.placeholder}>Не выбрано</span>
-                    ) : (
-                        options?.find(item => item.value === value)?.label
-                    )}
+                    <input
+                        type="text"
+                        value={options?.find(item => item.value === value)?.label}
+                        onChange={e => setSearchvalue(e.target.value)}
+                        placeholder="Не выбрано"
+                        readOnly={!search}
+                    />
 
                     {allowClear && !!value ? (
                         <button
@@ -74,18 +80,21 @@ const Select: React.FC<Props> = ({
                 </div>
 
                 <div className={s.dropdown}>
-                    {options.map(item => (
-                        <div
-                            key={item.value}
-                            className={classNames(s.item, { [s.selected]: item.value === value })}
-                            onClick={() => handleOnChange(item.value)}
-                        >
-                            {item.label}
-                            {item.value === value && (
-                                <i className={s.icon}>{svgIcons.check}</i>
-                            )}
-                        </div>
-                    ))}
+                    {options
+                        .filter(item => item.label.toLowerCase().includes(searchValue.toLowerCase()))
+                        .map(item => (
+                            <div
+                                key={item.value}
+                                className={classNames(s.item, { [s.selected]: item.value === value })}
+                                onClick={() => handleOnChange(item.value)}
+                            >
+                                {item.label}
+                                {item.value === value && (
+                                    <i className={s.icon}>{svgIcons.check}</i>
+                                )}
+                            </div>
+                        ))
+                    }
                 </div>
             </div>
 
@@ -109,6 +118,7 @@ interface Props {
     disabled?: boolean
     allowClear?: boolean
     onClear?: (v: string) => void
+    search?: boolean
 }
 
 export interface SelectOptionType {
