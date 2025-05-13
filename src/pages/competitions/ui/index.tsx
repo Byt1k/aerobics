@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom'
 import Tag, { TagProps } from '@/shared/ui/tag'
 import { formatDate } from '@/shared/lib/formatDate'
 import { useCurrentUser } from '@/entities/user'
+import classNames from 'classnames'
 
 export const CompetitionsListPage = () => {
     const currentUser = useCurrentUser()
@@ -88,8 +89,9 @@ export const CompetitionsListPage = () => {
         },
         {
             key: 'actions',
+            className: s.actionsColumn,
             render: comp => (
-                <div className="flex justify-end gap-2">
+                <div className={classNames("flex justify-end gap-2", s.actions)}>
                     <Link to={`/competitions/${comp.id}`}>
                         <Button className={s.tableBtn} asChild>
                             Открыть

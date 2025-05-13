@@ -27,3 +27,14 @@
         width: 100%;
     }
 }
+
+@media screen and (max-width: 700px) {
+    .title {
+        font-size: 20px;
+        line-height: 28px;
+    }
+
+    .form {
+        width: calc(100% - 30px);
+    }
+}

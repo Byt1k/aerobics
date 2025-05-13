@@ -35,19 +35,21 @@ const Table = <T,>({
                     </tr>
                 )}
 
-                {data?.map((row, i) => (
+                {data?.map((row, rowIndex) => (
                     <tr
-                        key={i}
+                        key={rowIndex}
                         className={classNames({
                             [s.disable]: rowDisable?.(row),
                         })}
                     >
-                        {columns?.map(column => (
-                            <td key={column.key} colSpan={column.colSpan}>
-                                {/* @ts-ignore */}
+                        {columns?.map((column, columnIndex) => (
+                            <td key={column.key} colSpan={column.colSpan} className={columns[columnIndex].className}>
+                                <span className={s.mobileHead}>
+                                    {columns[columnIndex].name}
+                                </span>
                                 {column.render
-                                    ? column.render(data[i])
-                                    : data[i][column.dataIndex!]}
+                                    ? column.render(data[rowIndex])
+                                    : data[rowIndex][column.dataIndex!] as ReactNode}
                             </td>
                         ))}
                     </tr>
@@ -73,4 +75,5 @@ export type TableColumns<T> = Array<{
     key: string
     render?: (record: T) => ReactNode
     colSpan?: number
+    className?: string
 }>
