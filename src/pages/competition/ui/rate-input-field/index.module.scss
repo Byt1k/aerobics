@@ -6,7 +6,7 @@
 
   .grid {
     display: grid;
-    grid-template: 100px 170px / 1fr 1fr;
+    grid-template: 100px auto / 1fr 1fr;
 
     > div {
       display: flex;
@@ -30,12 +30,12 @@
           font-size: 28px;
           text-align: center;
           font-weight: 600;
-          background-color: #14AE5C33;
+
         }
 
         &.fixed {
           input {
-            background-color: #900b0933;
+            background-color: #14AE5C33;
             color: #000;
           }
         }

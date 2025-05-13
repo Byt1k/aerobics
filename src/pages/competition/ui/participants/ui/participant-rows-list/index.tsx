@@ -14,6 +14,7 @@ export const ParticipantRowsList: React.FC<Props> = ({
     participants,
     fetchParticipants,
     openParticipantNameEditor,
+    openParticipantSubjectEditor,
 }) => {
     const [isDeleting, startDeleting] = useTransition()
 
@@ -207,9 +208,21 @@ export const ParticipantRowsList: React.FC<Props> = ({
                         )}
                     </div>
                 </td>
-                <td>{`${participant.country}, ${participant.city}`}</td>
                 <td>
-                    {!participant.confirmed && (
+                    <div className="flex gap-3">
+                        {`${participant.country}, ${participant.city}`}
+                        {!participant.confirmed && (
+                            <button
+                                className={s.nameEditBtn}
+                                onClick={() => openParticipantSubjectEditor(participant)}
+                            >
+                                {svgIcons.edit}
+                            </button>
+                        )}
+                    </div>
+                </td>
+                <td>
+                {!participant.confirmed && (
                         <Popconfirm
                             title="Вы действительно хотите удалить участника?"
                             okText="Удалить"
@@ -235,4 +248,5 @@ interface Props {
     competitionId: number
     fetchParticipants: () => Promise<void>
     openParticipantNameEditor: (v: Participant) => void
+    openParticipantSubjectEditor: (v: Participant) => void
 }

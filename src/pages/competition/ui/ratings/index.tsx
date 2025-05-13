@@ -42,7 +42,7 @@ const CompetitionRatings: React.FC<Props> = ({ competition }) => {
                     rows={rows}
                     competitionId={competition.id}
                     changeRate={currentUser.is_admin ? changeRate : undefined}
-                    changeDeductions={changeDeductions}
+                    changeDeductions={currentUser.is_admin ? changeDeductions : undefined}
                 />
             ))}
         </div>

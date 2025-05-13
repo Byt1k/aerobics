@@ -144,6 +144,7 @@ export const CompetitionPage = () => {
             ].includes(refereeRoleAndQueue?.role.id) && (
                 <RateInputField
                     competition={competition}
+                    isPending={isPending}
                     refereeRoleAndQueue={refereeRoleAndQueue!}
                 />
             )}
@@ -151,11 +152,12 @@ export const CompetitionPage = () => {
             {refereeRoleAndQueue?.role.id === userRolesList['арбитр'] && (
                 <ArbitratorModule
                     competition={competition}
+                    isPending={isPending}
                     refereeRoleAndQueue={refereeRoleAndQueue!}
                 />
             )}
 
-            {refereeRoleAndQueue?.role.id === userRolesList['главный судья'] && (
+            {refereeRoleAndQueue?.role.id === userRolesList['главный судья'] && competition.status !== 'not_started' && (
                 <Ratings competition={competition} />
             )}
         </div>

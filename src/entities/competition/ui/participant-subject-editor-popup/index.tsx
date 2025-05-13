@@ -4,30 +4,32 @@ import Input from '@/shared/ui/input'
 import Button from '@/shared/ui/button'
 import { toast } from 'react-toastify'
 import { Participant } from '../../model/types'
-import { changeParticipantName } from '../../actions/change-participant-name'
+import { changeParticipantSubject } from '../../actions/change-participant-subject'
 
-export const ParticipantNameEditorPopup: React.FC<Props> = ({
+export const ParticipantSubjectEditorPopup: React.FC<Props> = ({
     active,
     setActive,
     participant,
     updateParticipants,
 }) => {
-    const [value, setValue] = useState('')
+    const [country, setCountry] = useState('')
+    const [city, setCity] = useState('')
 
     useEffect(() => {
         if (active) {
-            setValue(participant.names)
+            setCountry(participant.country)
+            setCity(participant.city)
         }
     }, [active])
 
-    const changeName = async () => {
-        if (!value) {
-            toast.error('Укажите имя')
-            return
-        }
+    const changeSubject = async () => {
+        // if (!value) {
+        //     toast.error('Укажите имя')
+        //     return
+        // }
 
         try {
-            await changeParticipantName(participant.id, value)
+            await changeParticipantSubject(participant.id, { country, city })
             updateParticipants()
             setActive(false)
         } catch {
@@ -39,15 +41,27 @@ export const ParticipantNameEditorPopup: React.FC<Props> = ({
         <Popup
             active={active}
             setActive={setActive}
-            onClose={() => setValue('')}
+            onClose={() => {
+                setCountry('')
+                setCity('')
+            }}
             title={'Редактирование участника'}
-            content={<Input
-                label="Имя"
-                value={value}
-                onChange={setValue}
-            />}
+            content={
+                <div className="flex flex-col gap-2">
+                    <Input
+                        label="Страна"
+                        value={country}
+                        onChange={setCountry}
+                    />
+                    <Input
+                        label="Город"
+                        value={city}
+                        onChange={setCity}
+                    />
+                </div>
+            }
             actions={<div className="grid grid-cols-2 gap-4">
-                <Button className="w-full" onClick={changeName}>
+                <Button className="w-full" onClick={changeSubject}>
                     Изменить
                 </Button>
                 <Button

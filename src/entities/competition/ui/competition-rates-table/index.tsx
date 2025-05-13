@@ -100,7 +100,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                     <td>И3</td>
                     <td>И4</td>
                     <td className="font-bold">
-                        <p>И</p>
+                        {/*<p>И</p>*/}
                         <p>Итог</p>
                     </td>
                     <td>А1</td>
@@ -108,20 +108,20 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                     <td>А3</td>
                     <td>А4</td>
                     <td className="font-bold">
-                        <p>А</p>
+                        {/*<p>А</p>*/}
                         <p>Итог</p>
                     </td>
                     <td>C1</td>
                     <td>C2</td>
                     <td className="font-bold">
-                        <p>C</p>
+                        {/*<p>C</p>*/}
                         <p>Итог</p>
                     </td>
                     <td>Л</td>
                     <td>Э</td>
                     <td>ГС</td>
                     <td className="font-bold">
-                        <p>СБ</p>
+                        {/*<p>СБ</p>*/}
                         <p>Итог</p>
                     </td>
                 </tr>
@@ -228,7 +228,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                 />
 
                                 <td className="font-bold">
-                                    {totalDeductions(row)}
+                                    {totalDeductions(row)?.toFixed(2)}
                                 </td>
 
                                 <td className="font-bold">

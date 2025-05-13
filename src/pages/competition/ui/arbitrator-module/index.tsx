@@ -6,15 +6,15 @@ import Input from '@/shared/ui/input'
 import Button from '@/shared/ui/button'
 import { toast } from 'react-toastify'
 
-export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQueue }) => {
+export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQueue, isPending }) => {
     const { ws } = useWebSocket(competition.id)
     const [rows, setRows] = useState<RatingRow[]>([])
 
     const [currentRow, setCurrentRow] = useState<RatingRow | null>(null)
 
-    const [deductionLine, setDeductionLine] = useState('')
-    const [deductionElement, setDeductionElement] = useState('')
-    const [deductionJudge, setDeductionJudge] = useState('')
+    const [deductionLine, setDeductionLine] = useState('0')
+    const [deductionElement, setDeductionElement] = useState('0')
+    const [deductionJudge, setDeductionJudge] = useState('0')
     const [deductionIsFixed, setDeductionIsFixed] = useState(false)
 
     useEffect(() => {
@@ -93,6 +93,22 @@ export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQ
         ws?.send(JSON.stringify(payload))
     }
 
+    if (isPending) {
+        return 'Загрузка...'
+    }
+
+    if (!competition && !isPending) {
+        return 'Соревнование не найдено'
+    }
+
+    if (competition.status === 'not_started') {
+        return 'Соревнование не началось'
+    }
+
+    if (competition.status === 'finished') {
+        return 'Соревнование завершилось'
+    }
+
     return (
        <div className="flex flex-col gap-6">
            <CompetitionRatesTable
@@ -102,7 +118,7 @@ export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQ
                competitionId={competition.id}
            />
            {!!currentRow && (
-               <div className="flex flex-col gap-4 bg-white p-8 rounded-3xl">
+               <div className="flex flex-col gap-4 bg-white p-8 rounded-3xl sticky bottom-0">
                    <table className={s.deductionsTable}>
                        <thead>
                        <tr>
@@ -154,4 +170,5 @@ export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQ
 interface Props {
     refereeRoleAndQueue: UserRoleAndQueueByCompetition
     competition: Competition
+    isPending: boolean
 }

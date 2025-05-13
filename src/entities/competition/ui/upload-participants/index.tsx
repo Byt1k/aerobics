@@ -5,6 +5,7 @@ import { toast } from 'react-toastify'
 import { uploadParticipants } from '../../actions/upload-participants'
 import classNames from 'classnames'
 import Popup from '../../../../shared/ui/popup'
+import { Checkbox } from 'antd'
 
 export const UploadParticipants: React.FC<Props> = ({ fetchParticipants, competitionId, className, isUpload }) => {
     const [active, setActive] = useState(false)
@@ -13,6 +14,9 @@ export const UploadParticipants: React.FC<Props> = ({ fetchParticipants, competi
     const fileRef = useRef<File>(null)
     const [isUploading, startTransition] = useTransition()
 
+    const [isShuffle, setIsShuffle] = useState(false)
+    const [isGeneratedFile, setIsGeneratedFile] = useState(false)
+
     const handleUpload: ChangeEventHandler<HTMLInputElement> = e => {
         if (e.target.files?.[0]) {
             setActive(true)
@@ -20,7 +24,7 @@ export const UploadParticipants: React.FC<Props> = ({ fetchParticipants, competi
         }
     }
 
-    const upload = (isShuffle: boolean) => {
+    const upload = () => {
         setActive(false)
 
         startTransition(async () => {
@@ -29,7 +33,11 @@ export const UploadParticipants: React.FC<Props> = ({ fetchParticipants, competi
             }
 
             try {
-                await uploadParticipants(competitionId, fileRef.current, isShuffle)
+                await uploadParticipants(
+                    competitionId,
+                    fileRef.current,
+                    { shuffle: isShuffle, file_format: isGeneratedFile ? 'generated' : 'normal' },
+                )
                 toast.success('Данные загружены')
                 fetchParticipants()
             } catch {
@@ -40,6 +48,13 @@ export const UploadParticipants: React.FC<Props> = ({ fetchParticipants, competi
                 }
             }
         })
+    }
+
+    const cancel = () => {
+        setActive(false)
+        if (uploadInputRef.current) {
+            uploadInputRef.current.value = ''
+        }
     }
 
     return (
@@ -63,18 +78,36 @@ export const UploadParticipants: React.FC<Props> = ({ fetchParticipants, competi
                     if (uploadInputRef.current) {
                         uploadInputRef.current.value = ''
                     }
+                    setIsShuffle(false)
+                    setIsGeneratedFile(false)
                 }}
-                title="Перемешать загружаемых участников?"
-                content={<div className="grid grid-cols-2 gap-4 mt-8">
-                    <Button className="w-full" onClick={() => upload(true)}>
-                        Да
+                title="Загрузка участников"
+                content={
+                    <div className="flex flex-col gap-2">
+                        <Checkbox
+                            value={isShuffle}
+                            onChange={e => setIsShuffle(e.target.checked)}
+                        >
+                            Перемешать загружаемых участников
+                        </Checkbox>
+                        <Checkbox
+                            value={isGeneratedFile}
+                            onChange={e => setIsGeneratedFile(e.target.checked)}
+                        >
+                            Загрузка скаченного протокола
+                        </Checkbox>
+                    </div>
+                }
+                actions={<div className="grid grid-cols-2 gap-4">
+                    <Button className="w-full" onClick={upload}>
+                        Загрузить
                     </Button>
                     <Button
                         className="w-full"
-                        variant="secondary"
-                        onClick={() => upload(false)}
+                        variant="outlined"
+                        onClick={cancel}
                     >
-                        Нет
+                        Отмена
                     </Button>
                 </div>}
             />

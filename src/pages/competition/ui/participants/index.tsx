@@ -5,6 +5,7 @@ import {
     getParticipantsList,
     UploadParticipants,
     ParticipantNameEditorPopup,
+    ParticipantSubjectEditorPopup,
     DownloadParticipants,
 } from '@/entities/competition'
 import tableStyles from '@/shared/ui/table/index.module.scss'
@@ -62,12 +63,18 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
         fetchParticipants()
     }, [])
 
-    const [nameEditorOpened, setNameEditorOpened] = useState(false)
     const [selectedParticipant, setSelectedParticipant] = useState<Participant>()
+    const [nameEditorOpened, setNameEditorOpened] = useState(false)
+    const [subjectEditorOpened, setSubjectEditorOpened] = useState(false)
 
     const openParticipantNameEditor = (participant: Participant) => {
         setSelectedParticipant(participant)
         setNameEditorOpened(true)
+    }
+
+    const openParticipantSubjectEditor = (participant: Participant) => {
+        setSelectedParticipant(participant)
+        setSubjectEditorOpened(true)
     }
 
     return (
@@ -127,6 +134,7 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
                             participants={tableState[queue]}
                             fetchParticipants={fetchParticipants}
                             openParticipantNameEditor={openParticipantNameEditor}
+                            openParticipantSubjectEditor={openParticipantSubjectEditor}
                         />
                         </tbody>
                     </table>
@@ -137,6 +145,15 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
                 <ParticipantNameEditorPopup
                     active={nameEditorOpened}
                     setActive={setNameEditorOpened}
+                    participant={selectedParticipant}
+                    updateParticipants={fetchParticipants}
+                />
+            )}
+
+            {selectedParticipant && (
+                <ParticipantSubjectEditorPopup
+                    active={subjectEditorOpened}
+                    setActive={setSubjectEditorOpened}
                     participant={selectedParticipant}
                     updateParticipants={fetchParticipants}
                 />

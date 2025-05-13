@@ -8,7 +8,7 @@ import { useCurrentUser, userRolesList } from '@/entities/user'
 import { toast } from 'react-toastify'
 import classNames from 'classnames'
 
-export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competition }) => {
+export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competition, isPending }) => {
     const currentUser = useCurrentUser()
     const { ws } = useWebSocket(competition.id)
     const [currentRow, setCurrentRow] = useState<RatingRow | null>(null)
@@ -45,7 +45,7 @@ export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competiti
             if (currentRate) {
                 setRateIsFixed(true)
                 setRate(currentRate.rate.toString())
-            } else {
+            } else if (rateIsFixed) {
                 setRateIsFixed(false)
                 setRate('')
             }
@@ -55,6 +55,11 @@ export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competiti
 
     const sendRate = () => {
         if (!currentRow) return
+
+        if (rate === '') {
+            toast.error('Укажите оценку')
+            return
+        }
 
         if (rate.length > 3) {
             toast.error('Некорректная оценка')
@@ -77,9 +82,25 @@ export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competiti
         ws?.send(JSON.stringify(payload))
     }
 
-    if (!currentRow) {
-        return 'Все участники выступили'
+    if (isPending) {
+        return 'Загрузка...'
     }
+
+    if (!competition && !isPending) {
+        return 'Соревнование не найдено'
+    }
+
+    if (competition.status === 'not_started') {
+        return 'Соревнование не началось'
+    }
+
+    if (competition.status === 'finished') {
+        return 'Соревнование завершилось'
+    }
+
+    // if (!currentRow) {
+    //     return 'Все участники выступили'
+    // }
 
     return (
         <div className={s.wrapper}>
@@ -87,8 +108,8 @@ export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competiti
                 <div className="font-bold">Текущий участник</div>
                 <div className="font-bold">{refereeRoleAndQueue.role.title}</div>
                 <div>
-                    <h2>{currentRow.participant.names}</h2>
-                    <h4>{currentRow.participant.nomination_shortened}</h4>
+                    <h2>{currentRow?.participant.names}</h2>
+                    <h4>{currentRow?.participant.nomination_shortened}</h4>
                 </div>
                 <div>
                     <Input
@@ -102,7 +123,7 @@ export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competiti
                 </div>
             </div>
             <Button className={s.btn} onClick={sendRate} disabled={rateIsFixed}>
-                Зафиксировать
+                {rateIsFixed ? 'Оценка зафиксирована' : 'Зафиксировать'}
             </Button>
         </div>
     )
@@ -111,4 +132,5 @@ export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competiti
 interface Props {
     refereeRoleAndQueue: UserRoleAndQueueByCompetition
     competition: Competition
+    isPending: boolean
 }
