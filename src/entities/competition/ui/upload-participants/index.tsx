@@ -94,7 +94,7 @@ export const UploadParticipants: React.FC<Props> = ({ fetchParticipants, competi
                             value={isGeneratedFile}
                             onChange={e => setIsGeneratedFile(e.target.checked)}
                         >
-                            Загрузка скаченного протокола
+                            Загрузка скачанного протокола
                         </Checkbox>
                     </div>
                 }

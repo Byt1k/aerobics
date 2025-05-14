@@ -30,7 +30,7 @@ export const RootLayout: React.FC = () => {
         <div className="min-h-screen flex flex-col">
             <header className={s.header}>
                 <div className={classNames('container', s.wrapper)}>
-                    <Link to="/" className={s.logo}>
+                    <Link to={routes.competitionsList()} className={s.logo}>
                         <img src="/logo.png" alt="logo" />
                     </Link>
                     {user.is_admin && (
