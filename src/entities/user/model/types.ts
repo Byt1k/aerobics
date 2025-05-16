@@ -3,6 +3,7 @@ export interface UserType {
     username: string
     disabled: boolean
     is_admin: boolean
+    is_translation: boolean
 }
 
 export const userRolesList = {

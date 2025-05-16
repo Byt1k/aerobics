@@ -48,6 +48,7 @@ export type RatingRowsByBrigades = Record<number, RatingRow[]>
 
 export interface RatingRow {
     confirmed: boolean
+    confirmed_at: string | null
     deduction_element: number | null
     deduction_judge: number | null
     deduction_line: number | null

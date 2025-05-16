@@ -14,13 +14,14 @@ import {
     getCompetition,
     Competition,
     competitionStatuses,
+    startCompetition,
 } from '@/entities/competition'
 import { ArbitratorModule } from '../ui/arbitrator-module'
 import Ratings from '../ui/ratings'
 import Button from '@/shared/ui/button'
 import { svgIcons } from '@/shared/lib/svgIcons'
 import { toast } from 'react-toastify'
-import { startCompetition } from '../../../entities/competition'
+import { Translation } from '../ui/translation'
 
 export const CompetitionPage = () => {
     const { id } = useParams()
@@ -117,7 +118,7 @@ export const CompetitionPage = () => {
                     {refereeRoleAndQueue && [userRolesList['арбитр'], userRolesList['главный судья']]
                         //eslint-disable-next-line
                         // @ts-ignore
-                        .includes(refereeRoleAndQueue.role.id) && (
+                        .includes(refereeRoleAndQueue.role?.id) && (
                             <h3 className="ml-auto">{refereeRoleAndQueue.role.title.toUpperCase()}</h3>
                     )}
                 </div>
@@ -141,7 +142,7 @@ export const CompetitionPage = () => {
                 userRolesList['сложность судья'],
                 // eslint-disable-next-line
                 // @ts-ignore
-            ].includes(refereeRoleAndQueue?.role.id) && (
+            ].includes(refereeRoleAndQueue?.role?.id) && (
                 <RateInputField
                     competition={competition}
                     isPending={isPending}
@@ -149,7 +150,7 @@ export const CompetitionPage = () => {
                 />
             )}
 
-            {refereeRoleAndQueue?.role.id === userRolesList['арбитр'] && (
+            {refereeRoleAndQueue?.role?.id === userRolesList['арбитр'] && (
                 <ArbitratorModule
                     competition={competition}
                     isPending={isPending}
@@ -157,8 +158,12 @@ export const CompetitionPage = () => {
                 />
             )}
 
-            {refereeRoleAndQueue?.role.id === userRolesList['главный судья'] && competition.status !== 'not_started' && (
+            {refereeRoleAndQueue?.role?.id === userRolesList['главный судья'] && competition.status !== 'not_started' && (
                 <Ratings competition={competition} />
+            )}
+
+            {currentUser.is_translation && (
+                <Translation competition={competition} />
             )}
         </div>
     )

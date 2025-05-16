@@ -100,7 +100,7 @@ const RefereeingTeams: React.FC<{ competition: Competition }> = ({ competition }
             .filter(user => user.id !== currentUser.id &&
                 !usersByCompetitionList.some(userByCompetition =>
                     userByCompetition.id === user.id && userByCompetition.id !== selectedUserId
-                )
+                ) && !user.is_translation
             )
         return freeUsers.map(user => ({ value: user.id.toString(), label: user.username }))
     }, [allUsers, usersByCompetitionList, currentUser])

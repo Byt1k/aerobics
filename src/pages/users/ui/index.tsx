@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Button from '@/shared/ui/button'
 import Table, { TableColumns } from '@/shared/ui/table'
 import s from './index.module.scss'
@@ -27,7 +27,7 @@ export const UsersPage = () => {
 
     const [isDeleting, setIsDeleting] = useState<number[]>([])
 
-    const deleteUser = async (userId: number) => {
+    const deleteUser = useCallback(async (userId: number) => {
         setIsDeleting(prev => [...prev, userId])
 
         try {
@@ -39,7 +39,7 @@ export const UsersPage = () => {
         } finally {
             setIsDeleting(prev => prev.filter(id => id !== userId))
         }
-    }
+    }, [])
 
     const columns: TableColumns<UserType> = useMemo(() => [
         {
@@ -52,7 +52,7 @@ export const UsersPage = () => {
             render: user => (
                 <div className="flex justify-end gap-2">
                     <Button variant="outlined" className={s.tableBtn} onClick={() => editUser(user)}>Редактировать</Button>
-                    {currentUser?.id !== user.id && (
+                    {currentUser?.id !== user.id && !user.is_translation && (
                         <Button
                             variant="secondary"
                             className={s.tableBtn}
@@ -65,7 +65,7 @@ export const UsersPage = () => {
                 </div>
             )
         }
-    ], [isDeleting])
+    ], [isDeleting, currentUser, deleteUser])
 
     return (
         <div className="flex flex-col gap-8">

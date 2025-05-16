@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import classNames from 'classnames'
 import s from './index.module.scss'
 import { RatingRow, Rate } from '@/kernel/ws'
@@ -8,11 +8,12 @@ import { svgIcons } from '@/shared/lib/svgIcons'
 import { CompetitionReportPopup } from '../report-popup'
 import { ParticipantRateEditorPopup, SelectedChangingRate } from '../rate-editor-popup'
 import { DeductionsEditorPopup, SelectedChangingDeductions } from '../deductions-editor-popup'
-
-interface LeaderboardItem {
-    participantId: number
-    totalRates: number
-}
+import {
+    calculateTotalDeductions,
+    calculateTotalExecutionOrArtistry,
+    calculateTotalRate,
+} from '@/shared/lib/calculateTotalRate'
+import { useLeaderboard } from '@/shared/lib/use-leaderboard'
 
 export const CompetitionRatesTable: React.FC<Props> = ({
     queue,
@@ -25,58 +26,14 @@ export const CompetitionRatesTable: React.FC<Props> = ({
     const currentUser = useCurrentUser()
     const [isReport, setIsReport] = useState(false)
     const [reportNominationWithAgeGroup, setReportNominationWithAgeGroup] = useState<string>()
-    const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([])
-
-    const totalExecutionOrArtistry = (rates: Array<Rate | null>): number | null => {
-        if (rates.some(r => r === null)) {
-            return null
-        }
-
-        const rateValues = rates.map(r => r!.rate)
-
-        const sum = rateValues.reduce((acc, rate) => {
-            return acc + rate
-        }, 0)
-
-        return (sum - Math.max(...rateValues) - Math.min(...rateValues)) / 2
-    }
-
-    const totalDeductions = (row: RatingRow) => {
-        const deductions = [row.deduction_element, row.deduction_line, row.deduction_judge]
-
-        if (deductions.some(item => item === null)) {
-            return null
-        }
-
-        return deductions.reduce((acc, current) => acc! + current!, 0)
-    }
-
-    const calculateTotalRate = (row: RatingRow) => {
-        return ((totalExecutionOrArtistry(row.rates['исполнение']) ?? 0) +
-            (totalExecutionOrArtistry(row.rates['артистичность']) ?? 0) +
-            (row.rates['сложность'][0]?.rate ?? 0) / 2
-            - (totalDeductions(row) ?? 0))
-        || null
-    }
-
-    useEffect(() => {
-        const confirmedRows: LeaderboardItem[] = rows
-            .filter(row => row.confirmed)
-            .map(row => ({
-                participantId: row.participant_id,
-                totalRates: calculateTotalRate(row)!
-            }))
-
-        confirmedRows.sort((a, b) => b.totalRates - a.totalRates)
-
-        setLeaderboard(confirmedRows)
-    }, [rows])
 
     const [changeRatePopup, setChangeRatePopup] = useState(false)
     const [selectedChangingRate, setSelectedChangingRate] = useState<SelectedChangingRate>()
 
     const [changeDeductionsPopup, setChangeDeductionsPopup] = useState(false)
     const [selectedChangingDeductions, setSelectedChangingDeductions] = useState<SelectedChangingDeductions>()
+
+    const { getParticipantPlace } = useLeaderboard(rows)
 
     return (
         <>
@@ -173,7 +130,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                     />
                                 ))}
                                 <td className="font-bold">
-                                    {totalExecutionOrArtistry(row.rates['исполнение'])?.toFixed(2)}
+                                    {calculateTotalExecutionOrArtistry(row.rates['исполнение'])?.toFixed(2)}
                                 </td>
 
                                 {row.rates['артистичность'].map((rate, i) => (
@@ -188,7 +145,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                     />
                                 ))}
                                 <td className="font-bold">
-                                    {totalExecutionOrArtistry(row.rates['артистичность'])?.toFixed(2)}
+                                    {calculateTotalExecutionOrArtistry(row.rates['артистичность'])?.toFixed(2)}
                                 </td>
 
                                 <RateCeil
@@ -228,15 +185,14 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                 />
 
                                 <td className="font-bold">
-                                    {totalDeductions(row)?.toFixed(2)}
+                                    {calculateTotalDeductions(row)?.toFixed(2)}
                                 </td>
 
                                 <td className="font-bold">
                                     {calculateTotalRate(row)?.toFixed(2)}
                                 </td>
                                 <td className="font-bold">
-                                    {row.confirmed && leaderboard
-                                        .findIndex(p => p.participantId === row.participant_id)! + 1}
+                                    {getParticipantPlace(row.participant.nomination_shortened, row.participant.id)}
                                 </td>
                             </tr>
                         </React.Fragment>

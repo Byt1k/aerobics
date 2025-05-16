@@ -6,6 +6,7 @@ import { routes } from '@/kernel/routes'
 import { useCurrentUser } from '@/entities/user'
 import Cookies from 'js-cookie'
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from '@/kernel/instance'
+import 'swiper/css'
 
 const navigation = [
     { name: 'Соревнования', link: routes.competitionsList() },
