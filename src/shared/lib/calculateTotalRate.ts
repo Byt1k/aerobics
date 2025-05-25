@@ -1,5 +1,7 @@
 import { Rate, RatingRow } from '@/kernel/ws'
 
+const roundToHundredths = (num: number): number =>  Math.round(num * 100) / 100
+
 export const calculateTotalExecutionOrArtistry = (rates: Array<Rate | null>): number | null => {
     if (rates.some(r => r === null)) {
         return null
@@ -11,7 +13,9 @@ export const calculateTotalExecutionOrArtistry = (rates: Array<Rate | null>): nu
         return acc + rate
     }, 0)
 
-    return (sum - Math.max(...rateValues) - Math.min(...rateValues)) / 2
+    const res = (sum - Math.max(...rateValues) - Math.min(...rateValues)) / 2
+
+    return roundToHundredths(res)
 }
 
 export const calculateTotalDeductions = (row: RatingRow) => {
