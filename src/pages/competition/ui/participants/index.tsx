@@ -9,7 +9,7 @@ import {
     DownloadParticipants,
 } from '@/entities/competition'
 import tableStyles from '@/shared/ui/table/index.module.scss'
-import { ParticipantRowsList } from './ui/participant-rows-list'
+import { DragElementType, ParticipantRowsList } from './ui/participant-rows-list'
 
 const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
     const [isPending, setIsPending] = useState(true)
@@ -77,6 +77,8 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
         setSubjectEditorOpened(true)
     }
 
+    const [dragElementType, setDragElementType] = useState<DragElementType | null>(null)
+
     return (
         <div>
             <div className="flex items-center mb-4 gap-5">
@@ -135,6 +137,8 @@ const CompetitionParticipants: React.FC<Props> = ({ competition }) => {
                             fetchParticipants={fetchParticipants}
                             openParticipantNameEditor={openParticipantNameEditor}
                             openParticipantSubjectEditor={openParticipantSubjectEditor}
+                            dragElementType={dragElementType}
+                            setDragElementType={setDragElementType}
                         />
                         </tbody>
                     </table>

@@ -3,11 +3,12 @@
 import classNames from 'classnames'
 import s from './index.module.scss'
 import { Popconfirm } from 'antd'
-import React, { DragEventHandler, useOptimistic, useState, useTransition } from 'react'
-import { Participant, deleteCompetitionParticipant, moveParticipant } from '@/entities/competition'
+import React, { DragEventHandler, useOptimistic, useTransition } from 'react'
+import { Participant, deleteCompetitionParticipant, moveParticipant, moveNomination } from '@/entities/competition'
 import { toast } from 'react-toastify'
 import { svgIcons } from '@/shared/lib/svgIcons'
-import { moveNomination } from '../../../../../../entities/competition'
+
+export type DragElementType = 'nomination' | 'participant'
 
 export const ParticipantRowsList: React.FC<Props> = ({
     competitionId,
@@ -15,6 +16,8 @@ export const ParticipantRowsList: React.FC<Props> = ({
     fetchParticipants,
     openParticipantNameEditor,
     openParticipantSubjectEditor,
+    dragElementType,
+    setDragElementType,
 }) => {
     const [isDeleting, startDeleting] = useTransition()
 
@@ -46,8 +49,6 @@ export const ParticipantRowsList: React.FC<Props> = ({
         }
     )
 
-    const [selectedDrag, setSelectedDrag] = useState<'nomination' | 'participant' | null>(null)
-
     const [isMovingParticipant, startMovingParticipant] = useTransition()
 
     const saveMovingParticipant = (currentOrder: number, newOrder: number) => {
@@ -70,11 +71,11 @@ export const ParticipantRowsList: React.FC<Props> = ({
     const handleParticipantDragStart: DragEventHandler<HTMLTableRowElement> = (e) => {
         // @ts-ignore
         e.dataTransfer.setData('text/plain', e.target.dataset.order);
-        setSelectedDrag('participant')
+        setDragElementType('participant')
     }
 
     const handleParticipantDragOver: DragEventHandler<HTMLTableRowElement> = (e) => {
-        if (selectedDrag !== 'participant') return
+        if (dragElementType !== 'participant') return
 
         e.preventDefault()
         // @ts-ignore
@@ -82,14 +83,17 @@ export const ParticipantRowsList: React.FC<Props> = ({
     }
 
     const handleParticipantDragLeave: DragEventHandler<HTMLTableRowElement> = (e) => {
-        if (selectedDrag !== 'participant') return
+        if (dragElementType !== 'participant') return
 
         // @ts-ignore
         e.target.closest('tr').style.background = '#fff'
     }
 
     const handleParticipantDrop: DragEventHandler<HTMLTableRowElement> = (e) => {
-        if (selectedDrag !== 'participant') return
+        if (dragElementType !== 'participant') {
+            setDragElementType(null)
+            return
+        }
 
         const dragOrder = e.dataTransfer.getData('text/plain')
         // @ts-ignore
@@ -97,10 +101,13 @@ export const ParticipantRowsList: React.FC<Props> = ({
         // @ts-ignore
         e.target.closest('tr').style.background = '#fff'
 
-        if (dragOrder === dropOrder) return
+        if (dragOrder === dropOrder) {
+            setDragElementType(null)
+            return
+        }
 
         saveMovingParticipant(+dragOrder, +dropOrder)
-        setSelectedDrag(null)
+        setDragElementType(null)
     }
 
 
@@ -126,11 +133,11 @@ export const ParticipantRowsList: React.FC<Props> = ({
     const handleNominationDragStart: DragEventHandler<HTMLTableRowElement> = (e) => {
         // @ts-ignore
         e.dataTransfer.setData('text/plain', e.target.dataset.order)
-        setSelectedDrag('nomination')
+        setDragElementType('nomination')
     }
 
     const handleNominationDragOver: DragEventHandler<HTMLTableRowElement> = (e) => {
-        if (selectedDrag !== 'nomination') return
+        if (dragElementType !== 'nomination') return
 
         e.preventDefault()
         // @ts-ignore
@@ -138,14 +145,17 @@ export const ParticipantRowsList: React.FC<Props> = ({
     }
 
     const handleNominationDragLeave: DragEventHandler<HTMLTableRowElement> = (e) => {
-        if (selectedDrag !== 'nomination') return
+        if (dragElementType !== 'nomination') return
 
         // @ts-ignore
         e.target.closest('tr').style.background = '#fff'
     }
 
     const handleNominationDrop: DragEventHandler<HTMLTableRowElement> = (e) => {
-        if (selectedDrag !== 'nomination') return
+        if (dragElementType !== 'nomination') {
+            setDragElementType(null)
+            return
+        }
 
         const dragOrder = e.dataTransfer.getData('text/plain')
         // @ts-ignore
@@ -153,10 +163,13 @@ export const ParticipantRowsList: React.FC<Props> = ({
         // @ts-ignore
         e.target.closest('tr').style.background = '#fff'
 
-        if (dragOrder === dropOrder) return
+        if (dragOrder === dropOrder) {
+            setDragElementType(null)
+            return
+        }
 
         saveMovingNomination(+dragOrder, +dropOrder)
-        setSelectedDrag(null)
+        setDragElementType(null)
     }
 
     return optimisticParticipants.map((participant, index) => (
@@ -249,4 +262,6 @@ interface Props {
     fetchParticipants: () => Promise<void>
     openParticipantNameEditor: (v: Participant) => void
     openParticipantSubjectEditor: (v: Participant) => void
+    dragElementType: DragElementType | null
+    setDragElementType: (v: DragElementType | null) => void
 }
