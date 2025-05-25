@@ -17,8 +17,6 @@ type Leaderboard = Record<string, LeaderboardItem[]>
 export const useLeaderboard = (rows: RatingRow[]) => {
     const [leaderboard, setLeaderboard] = useState<Leaderboard>({})
 
-    console.log(leaderboard["ИМ 9-11"])
-
     useEffect(() => {
         const list: Leaderboard = {}
 

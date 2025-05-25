@@ -27,7 +27,7 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
                     main_secretary: mainSecretary,
                     place: place,
                     nomination: nomination,
-                    age_group: ageGroup,
+                    age_group: encodeURIComponent(ageGroup),
                 })
                 setActive(false)
             } catch (e: any) {
