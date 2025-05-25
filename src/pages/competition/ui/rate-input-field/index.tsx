@@ -50,7 +50,7 @@ export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competiti
                 setRate('')
             }
         }
-    }, [ws])
+    }, [ws, rateIsFixed, currentUser, refereeRoleAndQueue])
 
 
     const sendRate = () => {
