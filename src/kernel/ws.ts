@@ -52,6 +52,7 @@ export interface RatingRow {
     deduction_element: number | null
     deduction_judge: number | null
     deduction_line: number | null
+    has_shown: boolean
     participant: Participant
     participant_id: number
     rates: {

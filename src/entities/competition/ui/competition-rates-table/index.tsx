@@ -14,6 +14,7 @@ import {
     calculateTotalRate,
 } from '@/shared/lib/calculateTotalRate'
 import { useLeaderboard } from '@/shared/lib/use-leaderboard'
+import { ParticipantOptionsPopup } from '@/entities/competition/ui/participant-options-popup'
 
 export const CompetitionRatesTable: React.FC<Props> = ({
     queue,
@@ -22,6 +23,9 @@ export const CompetitionRatesTable: React.FC<Props> = ({
     changeRate,
     changeDeductions,
     competitionId,
+    unconfirmParticipant,
+    showParticipant,
+    translationQueue,
 }) => {
     const currentUser = useCurrentUser()
     const [isReport, setIsReport] = useState(false)
@@ -32,6 +36,9 @@ export const CompetitionRatesTable: React.FC<Props> = ({
 
     const [changeDeductionsPopup, setChangeDeductionsPopup] = useState(false)
     const [selectedChangingDeductions, setSelectedChangingDeductions] = useState<SelectedChangingDeductions>()
+
+    const [participantOptionsPopup, setParticipantOptionsPopup] = useState(false)
+    const [selectedParticipant, setSelectedParticipant] = useState<RatingRow>()
 
     const { getParticipantPlace } = useLeaderboard(rows)
 
@@ -113,8 +120,18 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                                     { [s.current]: !rowIndex && !row.confirmed },
                                     { [s.current]: rows[rowIndex - 1]?.confirmed && !row.confirmed },
                                     { [s.confirmed]: row.confirmed },
+                                    { [s.waiting]: translationQueue?.some(num => num === row.participant.order_num)},
+                                    { [s.shown]: row.has_shown },
                                 )}>
-                                <td className="max-w-[200px]">
+                                <td
+                                    className={`max-w-[200px] ${showParticipant && !row.has_shown && row.confirmed && 'cursor-pointer'}`}
+                                    onClick={showParticipant && !row.has_shown && row.confirmed
+                                        ? () => {
+                                            setSelectedParticipant(row)
+                                            setParticipantOptionsPopup(true)
+                                        } : undefined
+                                    }
+                                >
                                     {row.participant.names}
                                 </td>
 
@@ -228,6 +245,17 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                     onClose={() => setSelectedChangingDeductions(undefined)}
                 />
             )}
+
+            {selectedParticipant && (
+                <ParticipantOptionsPopup
+                    active={participantOptionsPopup}
+                    setActive={setParticipantOptionsPopup}
+                    onClose={() => setSelectedParticipant(undefined)}
+                    participant={selectedParticipant}
+                    showParticipant={showParticipant}
+                    unconfirmParticipant={unconfirmParticipant}
+                />
+            )}
         </>
     )
 }
@@ -238,7 +266,10 @@ interface Props {
     declinedRate?: (userId: number) => void
     changeRate?: (payload: ChangeRatePayload) => void
     changeDeductions?: (payload: ChangeDeductionsPayload) => void
+    unconfirmParticipant?: (participantId: number) => void
     competitionId: number
+    translationQueue: number[]
+    showParticipant?: (participantOrderNum: number) => void
 }
 
 export interface ChangeRatePayload {

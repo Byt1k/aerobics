@@ -4,10 +4,6 @@
   padding: 20px;
   margin: 50px auto 0 auto;
   width: 100%;
-
-  @media screen and (min-width: 1200px) {
-    width: 50%;
-  }
 }
 
 .result {
@@ -26,7 +22,7 @@
     gap: 10px;
 
     p {
-      font-size: 20px;
+      font-size: 30px;
     }
   }
 
@@ -37,7 +33,7 @@
     text-align: center;
 
     p {
-      font-size: 50px;
+      font-size: 100px;
       font-weight: 700;
     }
   }

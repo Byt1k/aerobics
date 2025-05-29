@@ -16,12 +16,24 @@
 
 .current {
   td {
-    background-color: #14AE5C33;
+    background-color: #E6E6E6;
   }
 }
 
 .confirmed {
   td {
-    background-color: #E6E6E6;
+    background-color: #ffc2c2;
+  }
+}
+
+.waiting {
+  td {
+    background-color: #fffec2;
+  }
+}
+
+.shown {
+  td {
+    background-color: #14AE5C33;
   }
 }

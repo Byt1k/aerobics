@@ -7,6 +7,7 @@ import { toast } from 'react-toastify'
 const CompetitionRatings: React.FC<Props> = ({ competition }) => {
     const { ws } = useWebSocket(competition.id)
     const [tableData, setTableData] = useState<RatingRowsByBrigades>({})
+    const [translationQueue, setTranslationQueue] = useState<number[]>([])
     const currentUser = useCurrentUser()
 
     useEffect(() => {
@@ -22,6 +23,7 @@ const CompetitionRatings: React.FC<Props> = ({ competition }) => {
             }
 
             setTableData(data.rating_rows_by_brigades)
+            setTranslationQueue(data.translation_numbers ?? [])
         }
     }, [ws])
 
@@ -43,6 +45,7 @@ const CompetitionRatings: React.FC<Props> = ({ competition }) => {
                     competitionId={competition.id}
                     changeRate={currentUser.is_admin ? changeRate : undefined}
                     changeDeductions={currentUser.is_admin ? changeDeductions : undefined}
+                    translationQueue={translationQueue}
                 />
             ))}
         </div>

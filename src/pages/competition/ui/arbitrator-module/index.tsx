@@ -17,6 +17,8 @@ export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQ
     const [deductionJudge, setDeductionJudge] = useState('0')
     const [deductionIsFixed, setDeductionIsFixed] = useState(false)
 
+    const [translationQueue, setTranslationQueue] = useState<number[]>([])
+
     useEffect(() => {
         if (!ws) return
 
@@ -30,8 +32,10 @@ export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQ
                 return
             }
 
-            const data = message.rating_rows_by_brigades[refereeRoleAndQueue.queue_index] as RatingRow[]
+            const translation = message.translation_numbers as number[]
+            setTranslationQueue(translation ?? [])
 
+            const data = message.rating_rows_by_brigades[refereeRoleAndQueue.queue_index] as RatingRow[]
             const current = data.find(r => !r.confirmed)
 
             setRows(data)
@@ -82,6 +86,27 @@ export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQ
         ws?.send(JSON.stringify(payload))
     }
 
+    const unconfirm = (participantId: number) => {
+        if (!currentRow) return
+
+        const payload = {
+            participant_id: participantId,
+            confirmed: false
+        }
+
+        ws?.send(JSON.stringify(payload))
+    }
+
+    const show = (participantOrderNum: number) => {
+        if (!currentRow) return
+
+        const payload = {
+            add_number_translation: participantOrderNum,
+        }
+
+        ws?.send(JSON.stringify(payload))
+    }
+
     const declinedRate = (userId: number) => {
         if (!currentRow) return
 
@@ -116,6 +141,9 @@ export const ArbitratorModule: React.FC<Props> = ({ competition, refereeRoleAndQ
                rows={rows}
                declinedRate={declinedRate}
                competitionId={competition.id}
+               unconfirmParticipant={unconfirm}
+               showParticipant={show}
+               translationQueue={translationQueue}
            />
            {!!currentRow && (
                <div className="flex flex-col gap-4 bg-white p-8 rounded-3xl sticky bottom-0">

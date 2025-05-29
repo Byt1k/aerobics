@@ -4,14 +4,20 @@ import Input from '@/shared/ui/input'
 import Button from '@/shared/ui/button'
 import { downloadCompetitionReport } from '../../actions/download-report'
 import { toast } from 'react-toastify'
+import { createChangeStateHandler } from '@/shared/lib/change-state-handler'
+
+interface FormState {
+    date_string: string
+    main_judge: string
+    main_secretary: string
+    place: string
+}
 
 export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onClose, competitionId, nominationWithAgeGroup }) => {
-    const [date, setDate] = useState('')
-    const [mainJudge, setMainJudge] = useState('')
-    const [mainSecretary, setMainSecretary] = useState('')
-    const [place, setPlace] = useState('')
-
+    const [formState, setFormState] = useState<FormState>({} as FormState)
     const [isPending, startTransition] = useTransition()
+
+    const changeFormState = createChangeStateHandler(setFormState)
 
     const onSubmit = (e: FormEvent) => {
         e.preventDefault()
@@ -21,14 +27,18 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
 
             try {
                 await downloadCompetitionReport({
+                    ...formState,
                     competition_id: competitionId,
-                    date_string: date,
-                    main_judge: mainJudge,
-                    main_secretary: mainSecretary,
-                    place: place,
                     nomination: nomination,
                     age_group: encodeURIComponent(ageGroup),
                 })
+
+                const savedData = localStorage.getItem('competitionReportData')
+                const data: Record<string, FormState> | null = savedData ? JSON.parse(savedData) : null
+                localStorage.setItem('competitionReportData', JSON.stringify(
+                    data ? { ...data, [competitionId]: formState } : { [competitionId]: formState }
+                ))
+
                 setActive(false)
             } catch (e: any) {
                 toast.error(`Не удалось сформировать отчет (status: ${e?.status})`)
@@ -36,18 +46,23 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
         })
     }
 
-    const resetForm = () => {
-        setDate('')
-        setMainJudge('')
-        setMainSecretary('')
-        setPlace('')
-    }
-
     useEffect(() => {
-        if (!active) {
-            resetForm()
+        if (active) {
+            const savedData = localStorage.getItem('competitionReportData')
+            const data: Record<string, FormState> | null = savedData ? JSON.parse(savedData) : null
+
+            if (data?.[competitionId]) {
+                setFormState(data[competitionId])
+            } else {
+                setFormState({
+                    date_string: '',
+                    main_judge: '',
+                    main_secretary: '',
+                    place: '',
+                })
+            }
         }
-    }, [active])
+    }, [active, competitionId])
 
     return (
         <Popup
@@ -59,26 +74,26 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
                 <form className="flex flex-col gap-4" onSubmit={onSubmit}>
                     <Input
                         label="Дата соревнования"
-                        value={date}
-                        onChange={setDate}
+                        value={formState.date_string}
+                        onChange={v => changeFormState('date_string', v)}
                         required
                     />
                     <Input
                         label="Место проведения"
-                        value={place}
-                        onChange={setPlace}
+                        value={formState.place}
+                        onChange={v => changeFormState('place', v)}
                         required
                     />
                     <Input
                         label="Главный судья"
-                        value={mainJudge}
-                        onChange={setMainJudge}
+                        value={formState.main_judge}
+                        onChange={v => changeFormState('main_judge', v)}
                         required
                     />
                     <Input
                         label="Секретарь"
-                        value={mainSecretary}
-                        onChange={setMainSecretary}
+                        value={formState.main_secretary}
+                        onChange={v => changeFormState('main_secretary', v)}
                         required
                     />
                     <div className="grid grid-cols-2 gap-4">

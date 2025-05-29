@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import s from './index.module.scss'
-import Input from '@/shared/ui/input'
 import { UserRoleAndQueueByCompetition, Competition } from '@/entities/competition'
 import Button from '@/shared/ui/button'
 import { useWebSocket, RatingRow, RatingRowsByBrigades, Rate } from '@/kernel/ws'
 import { useCurrentUser, userRolesList } from '@/entities/user'
 import { toast } from 'react-toastify'
 import classNames from 'classnames'
+import { trimText } from '@/shared/lib/trim-text'
+import { Keyboard } from '@/shared/ui/keyboard'
 
 export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competition, isPending }) => {
     const currentUser = useCurrentUser()
@@ -105,24 +106,17 @@ export const RateInputField: React.FC<Props> = ({ refereeRoleAndQueue, competiti
     return (
         <div className={s.wrapper}>
             <div className={s.grid}>
-                <div className="font-bold">Текущий участник</div>
-                <div className="font-bold">{refereeRoleAndQueue.role.title}</div>
-                <div>
-                    <h2>{currentRow?.participant.names}</h2>
+                <div className="font-bold text-center">{refereeRoleAndQueue.role.title}</div>
+                <div className={s.head}>
+                    <h2>{trimText(currentRow?.participant.names ?? '', 40)}</h2>
                     <h4>{currentRow?.participant.nomination_shortened}</h4>
                 </div>
-                <div>
-                    <Input
-                        placeholder="Введите оценку"
-                        type="number"
-                        value={rate}
-                        onChange={setRate}
-                        className={classNames(s.field, { [s.fixed]: rateIsFixed })}
-                        disabled={rateIsFixed}
-                    />
+                <div className={classNames(s.field, { [s.fixed]: rateIsFixed })}>
+                    {rate || <span className={s.placeholder}>Введите оценку</span>}
                 </div>
+                <Keyboard setValue={setRate} disabled={rateIsFixed} />
             </div>
-            <Button className={s.btn} onClick={sendRate} disabled={rateIsFixed}>
+            <Button className={s.btn} onClick={sendRate} disabled={rateIsFixed || !currentRow}>
                 {rateIsFixed ? 'Оценка зафиксирована' : 'Зафиксировать'}
             </Button>
         </div>

@@ -14,7 +14,7 @@ import {
     getCompetition,
     Competition,
     competitionStatuses,
-    startCompetition,
+    startCompetition, getUsersByCompetition,
 } from '@/entities/competition'
 import { ArbitratorModule } from '../ui/arbitrator-module'
 import Ratings from '../ui/ratings'
@@ -54,7 +54,16 @@ export const CompetitionPage = () => {
     }, [id])
 
     const start = async () => {
+        if (!competition) return
+
         try {
+            const judges = await getUsersByCompetition(competition.id)
+
+            if (judges?.length < 10 * competition?.queues_amount + 1) {
+                toast.error('Не удалось начать соревнование. Не назначены все судьи.')
+                return
+            }
+
             await startCompetition(id!)
             fetchCompetition(id!)
         } catch {
