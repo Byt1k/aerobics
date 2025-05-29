@@ -20,24 +20,32 @@ export const ParticipantOptionsPopup: React.FC<Props> = ({
             setActive={setActive}
             onClose={onClose}
             title={''}
-            content={(
+            content={
                 <div className="flex gap-4">
                     <Button
                         disabled={participant.has_shown}
-                        onClick={() => showParticipant?.(participant.participant.order_num)}
+                        onClick={() => {
+                            showParticipant?.(participant.participant.order_num)
+                            setActive(false)
+                        }}
                     >
                         Показать участника
                     </Button>
                     {!currentUser.is_admin && (
                         <Button
                             variant={'secondary'}
-                            onClick={() => unconfirmParticipant?.(participant.participant.id)}
+                            onClick={() => {
+                                unconfirmParticipant?.(
+                                    participant.participant.id,
+                                )
+                                setActive(false)
+                            }}
                         >
                             Переоценить участника
                         </Button>
                     )}
                 </div>
-            )}
+            }
         />
     )
 }
