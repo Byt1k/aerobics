@@ -1,20 +1,13 @@
 import React, { useState } from 'react'
-import classNames from 'classnames'
 import s from './index.module.scss'
-import { RatingRow, Rate } from '@/kernel/ws'
-import { Popconfirm } from 'antd'
+import { RatingRow } from '@/kernel/ws'
 import { useCurrentUser } from '@/entities/user'
-import { svgIcons } from '@/shared/lib/svgIcons'
 import { CompetitionReportPopup } from '../report-popup'
 import { ParticipantRateEditorPopup, SelectedChangingRate } from '../rate-editor-popup'
 import { DeductionsEditorPopup, SelectedChangingDeductions } from '../deductions-editor-popup'
-import {
-    calculateTotalDeductions,
-    calculateTotalExecutionOrArtistry,
-    calculateTotalRate,
-} from '@/shared/lib/calculateTotalRate'
 import { useLeaderboard } from '@/shared/lib/use-leaderboard'
 import { ParticipantOptionsPopup } from '@/entities/competition/ui/participant-options-popup'
+import { TableRow } from './TableRow'
 
 export const CompetitionRatesTable: React.FC<Props> = ({
     queue,
@@ -91,130 +84,31 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                 </tr>
                 </thead>
                 <tbody>
-                {rows.map((row, rowIndex) => {
-                    const nominationWithAgeGroup = `${row.participant.nomination} | ${row.participant.age_group}`
-                    const prevNominationWithAgeGroup = `${rows[rowIndex - 1]?.participant.nomination} | ${rows[rowIndex - 1]?.participant.age_group}`
+                {rows.map((row, rowIndex) => (
+                    <TableRow
+                        key={row.participant_id}
+                        row={row}
+                        rowIndex={rowIndex}
+                        rows={rows}
+                        currentUser={currentUser}
+                        showParticipant={showParticipant}
+                        translationQueue={translationQueue}
+                        declinedRate={declinedRate}
+                        changeRate={changeRate}
+                        changeDeductions={changeDeductions}
+                        setReportNominationWithAgeGroup={setReportNominationWithAgeGroup}
+                        setIsReport={setIsReport}
+                        setSelectedParticipant={setSelectedParticipant}
+                        setParticipantOptionsPopup={setParticipantOptionsPopup}
+                        getParticipantPlace={getParticipantPlace}
+                        setChangeRatePopup={setChangeRatePopup}
+                        setSelectedChangingRate={setSelectedChangingRate}
+                        setChangeDeductionsPopup={setChangeDeductionsPopup}
+                        setSelectedChangingDeductions={setSelectedChangingDeductions}
+                    >
 
-                    return (
-                        <React.Fragment key={row.participant_id}>
-                            {nominationWithAgeGroup !== prevNominationWithAgeGroup && (
-                                <tr>
-                                    <td className="text-center font-bold" colSpan={20}>
-                                        <div className="flex items-center justify-center gap-4">
-                                            {nominationWithAgeGroup}
-                                            {currentUser.is_admin && (
-                                                <button onClick={() => {
-                                                    setReportNominationWithAgeGroup(nominationWithAgeGroup)
-                                                    setIsReport(true)
-                                                }}>
-                                                    {svgIcons.download}
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                            <tr
-                                key={row.participant_id}
-                                className={classNames(
-                                    { [s.current]: !rowIndex && !row.confirmed },
-                                    { [s.current]: rows[rowIndex - 1]?.confirmed && !row.confirmed },
-                                    { [s.confirmed]: row.confirmed },
-                                    { [s.waiting]: translationQueue?.some(num => num === row.participant.order_num)},
-                                    { [s.shown]: row.has_shown },
-                                )}>
-                                <td
-                                    className={`max-w-[200px] ${showParticipant && !row.has_shown && row.confirmed && 'cursor-pointer'}`}
-                                    onClick={showParticipant && !row.has_shown && row.confirmed
-                                        ? () => {
-                                            setSelectedParticipant(row)
-                                            setParticipantOptionsPopup(true)
-                                        } : undefined
-                                    }
-                                >
-                                    {row.participant.names}
-                                </td>
-
-                                {row.rates['исполнение'].map((rate, i) => (
-                                    <RateCeil
-                                        key={i}
-                                        rate={rate}
-                                        refereeShortName={`И${i + 1}`}
-                                        declinedRate={declinedRate}
-                                        openPopupChangeRate={changeRate ? setChangeRatePopup : undefined}
-                                        setSelectedRate={setSelectedChangingRate}
-                                        participantId={row.participant_id}
-                                    />
-                                ))}
-                                <td className="font-bold">
-                                    {calculateTotalExecutionOrArtistry(row.rates['исполнение'])?.toFixed(2)}
-                                </td>
-
-                                {row.rates['артистичность'].map((rate, i) => (
-                                    <RateCeil
-                                        key={i}
-                                        rate={rate}
-                                        refereeShortName={`А${i + 1}`}
-                                        declinedRate={declinedRate}
-                                        openPopupChangeRate={changeRate ? setChangeRatePopup : undefined}
-                                        setSelectedRate={setSelectedChangingRate}
-                                        participantId={row.participant_id}
-                                    />
-                                ))}
-                                <td className="font-bold">
-                                    {calculateTotalExecutionOrArtistry(row.rates['артистичность'])?.toFixed(2)}
-                                </td>
-
-                                <RateCeil
-                                    rate={row.rates['сложность'][0]}
-                                    refereeShortName={'C1'}
-                                    declinedRate={declinedRate}
-                                    openPopupChangeRate={changeRate ? setChangeRatePopup : undefined}
-                                    setSelectedRate={setSelectedChangingRate}
-                                    participantId={row.participant_id}
-                                    isDifficulty
-                                />
-                                <td>{row.rates['сложность'][0]?.rate}</td>
-                                <td className="font-bold">
-                                    {row.rates['сложность'][0]?.rate
-                                        ? row.rates['сложность'][0]?.rate / 2
-                                        : null
-                                    }
-                                </td>
-
-                                <DeductionCeil
-                                    deduction={row.deduction_line}
-                                    openPopupChangeDeductions={changeDeductions ? setChangeDeductionsPopup : undefined}
-                                    setSelectedDeductions={setSelectedChangingDeductions}
-                                    row={row}
-                                />
-                                <DeductionCeil
-                                    deduction={row.deduction_element}
-                                    openPopupChangeDeductions={changeDeductions ? setChangeDeductionsPopup : undefined}
-                                    setSelectedDeductions={setSelectedChangingDeductions}
-                                    row={row}
-                                />
-                                <DeductionCeil
-                                    deduction={row.deduction_judge}
-                                    openPopupChangeDeductions={changeDeductions ? setChangeDeductionsPopup : undefined}
-                                    setSelectedDeductions={setSelectedChangingDeductions}
-                                    row={row}
-                                />
-
-                                <td className="font-bold">
-                                    {calculateTotalDeductions(row)?.toFixed(2)}
-                                </td>
-
-                                <td className="font-bold">
-                                    {calculateTotalRate(row)?.toFixed(2)}
-                                </td>
-                                <td className="font-bold">
-                                    {getParticipantPlace(row.participant.nomination_shortened, row.participant.id)}
-                                </td>
-                            </tr>
-                        </React.Fragment>
-                    )
-                })}
+                    </TableRow>
+                ))}
                 </tbody>
             </table>
 
@@ -283,89 +177,4 @@ export interface ChangeDeductionsPayload {
     deduction_line: number,
     deduction_element: number
     deduction_judge: number
-}
-
-interface RateCeilProps {
-    rate: Rate | null
-    refereeShortName: string
-    declinedRate?: (userId: number) => void
-    participantId: number
-    openPopupChangeRate?: (v: boolean) => void
-    setSelectedRate: (v: SelectedChangingRate) => void
-    isDifficulty?: boolean
-}
-
-function RateCeil({
-    rate,
-    openPopupChangeRate,
-    setSelectedRate,
-    declinedRate,
-    refereeShortName,
-    participantId,
-    isDifficulty,
-}: RateCeilProps) {
-    const select = () => {
-        setSelectedRate({
-            refereeShortName: refereeShortName,
-            rate: rate!,
-            participantId: participantId,
-            isDifficulty,
-        })
-        openPopupChangeRate?.(true)
-    }
-
-    return (
-        <td>
-            {declinedRate && rate && (
-                <Popconfirm
-                    title={`Вы хотите отменить оценку ${refereeShortName}`}
-                    cancelText="Нет"
-                    okText="Да"
-                    onConfirm={() => declinedRate(rate.user_id)}
-                >
-                    <button>{rate.rate}</button>
-                </Popconfirm>
-            )}
-
-            {openPopupChangeRate && rate && (
-                <button onClick={select}>{rate.rate}</button>
-            )}
-
-            {!declinedRate && !openPopupChangeRate && rate && rate.rate}
-        </td>
-    )
-}
-
-interface DeductionCeilProps {
-    deduction: number | null
-    openPopupChangeDeductions?: (v: boolean) => void
-    row: RatingRow
-    setSelectedDeductions: (v: SelectedChangingDeductions) => void
-}
-
-function DeductionCeil({
-    deduction,
-    row,
-    setSelectedDeductions,
-    openPopupChangeDeductions,
-}: DeductionCeilProps) {
-    const select = () => {
-        setSelectedDeductions({
-            participantId: row.participant_id,
-            line: row.deduction_line!.toString(),
-            element: row.deduction_element!.toString(),
-            mainJudge: row.deduction_judge!.toString(),
-        })
-        openPopupChangeDeductions?.(true)
-    }
-
-    return (
-        <td>
-            {openPopupChangeDeductions && deduction !== null && (
-                <button onClick={select}>{deduction}</button>
-            )}
-
-            {!openPopupChangeDeductions && deduction}
-        </td>
-    )
 }
