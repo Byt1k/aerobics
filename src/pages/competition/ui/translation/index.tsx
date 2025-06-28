@@ -15,24 +15,11 @@ const MIN_SHOW_TIME = 30 // секунд
 
 export const Translation: React.FC<IProps> = ({ competition }) => {
     const { ws } = useWebSocket(competition.id)
-    const [allRows, setAllRows] = useState<RatingRow[]>([])
+    const [confirmedParticipants, setaConfirmedParticipants] = useState<RatingRow[]>([])
 
-    // const swiperRef = useRef<SwiperRef>(null)
     const [currentParticipant, setCurrentParticipant] = useState<RatingRow>()
     const [translationQueue, setTranslationQueue] = useState<number[]>([])
     const [showTime, setShowTime] = useState(MIN_SHOW_TIME)
-
-    // const goToSlide = (index: number) => {
-    //     if (swiperRef.current) {
-    //         swiperRef.current.swiper.slideToLoop(index)
-    //     }
-    // }
-    //
-    // useEffect(() => {
-    //     if (currentSlideIndex === allRows.length - 2) {
-    //         goToSlide(allRows.length - 1)
-    //     }
-    // }, [allRows])
 
     const participantShown = useCallback((participantOrderNum: number) => {
         const payload = {
@@ -57,14 +44,14 @@ export const Translation: React.FC<IProps> = ({ competition }) => {
             const { rating_rows_by_brigades, translation_numbers } = (data as { rating_rows_by_brigades: RatingRowsByBrigades; translation_numbers: number[] })
 
             const confirmedRows = Object.values(rating_rows_by_brigades).flatMap(queue =>
-                queue.filter(row => row.confirmed && !row.has_shown)
+                queue.filter(row => row.confirmed)
             )
 
             confirmedRows.sort((a, b) =>
                 new Date(a.confirmed_at ?? '').getTime() - new Date(b.confirmed_at ?? '').getTime()
             )
 
-            setAllRows(confirmedRows)
+            setaConfirmedParticipants(confirmedRows)
             setTranslationQueue(translation_numbers)
         }
     }, [ws])
@@ -72,7 +59,16 @@ export const Translation: React.FC<IProps> = ({ competition }) => {
     const timerRef = useRef<NodeJS.Timeout | null>(null)
 
     useEffect(() => {
-        if (allRows.length && translationQueue.length && showTime >= MIN_SHOW_TIME) {
+        if (confirmedParticipants.length && translationQueue.length && showTime >= MIN_SHOW_TIME) {
+            const queue = translationQueue.filter(num => currentParticipant?.participant.order_num !== num)
+
+            const nextParticipant = confirmedParticipants
+                .find(r => !r.has_shown && r.participant.order_num === queue[0])
+
+            if (!nextParticipant) {
+                return
+            }
+
             if (currentParticipant) {
                 participantShown(currentParticipant.participant.order_num)
             }
@@ -81,28 +77,16 @@ export const Translation: React.FC<IProps> = ({ competition }) => {
                 clearInterval(timerRef.current)
             }
 
-            const participant = allRows
-                .find(r => r.participant.order_num === translationQueue[0])
-            setCurrentParticipant(participant)
-
             setShowTime(0)
             timerRef.current = setInterval(() => {
                 setShowTime(prev => prev + 1)
             }, 1000)
+
+            setCurrentParticipant(nextParticipant)
         }
-    }, [translationQueue, allRows, showTime, currentParticipant, participantShown])
+    }, [translationQueue, confirmedParticipants, showTime, currentParticipant, participantShown])
 
-    useEffect(() => {
-        setTimeout(() => {
-            setTranslationQueue([3])
-        }, 5000)
-
-        setTimeout(() => {
-            setTranslationQueue([7])
-        }, 7000)
-    }, [])
-
-    const { getParticipantPlace } = useLeaderboard(allRows)
+    const { getParticipantPlace } = useLeaderboard(confirmedParticipants)
 
     if (!currentParticipant) return
 
@@ -130,59 +114,6 @@ export const Translation: React.FC<IProps> = ({ competition }) => {
                     </p>
                 </div>
             </div>
-
-            {/*<Swiper*/}
-            {/*    ref={swiperRef}*/}
-            {/*    spaceBetween={50}*/}
-            {/*    slidesPerView={1}*/}
-            {/*    navigation*/}
-            {/*    pagination*/}
-            {/*    onSlideChange={({ realIndex }) => setCurrentSlideIndex(realIndex)}*/}
-            {/*>*/}
-                {/*{allRows.map((row, i) => (*/}
-                {/*    <SwiperSlide key={row.participant.id}>*/}
-                {/*<div className="flex gap-2">*/}
-                {/*    <h1>{i + 1}.</h1>*/}
-                {/*    <div>*/}
-                {/*        <h1>{trimText(row.participant.names, 45)}</h1>*/}
-                {/*        <h2 className="mt-2">{row.participant.nomination_shortened}</h2>*/}
-                {/*    </div>*/}
-                {/*</div>*/}
-                {/*<div className={s.result}>*/}
-                {/*    <div className={s.rates}>*/}
-                {/*        <p>И: <b>{calculateTotalExecutionOrArtistry(row.rates['исполнение'])?.toFixed(2)}</b></p>*/}
-                {/*        <p>А: <b>{calculateTotalExecutionOrArtistry(row.rates['артистичность'])?.toFixed(2)}</b></p>*/}
-                {/*        {row.rates['сложность'][0]?.rate && <p>С: <b>{(row.rates['сложность'][0]?.rate / 2).toFixed(2)}</b></p>}*/}
-                {/*        <p>Сб: <b>{calculateTotalDeductions(row)?.toFixed(2)}</b></p>*/}
-                {/*        <h1>Итоговая оценка: {calculateTotalRate(row)?.toFixed(2)}</h1>*/}
-                {/*    </div>*/}
-                {/*    <div className={s.place}>*/}
-                {/*        <h2>Место</h2>*/}
-                {/*        <p>*/}
-                {/*            {getParticipantPlace(row.participant.nomination_shortened, row.participant.id)}*/}
-                {/*        </p>*/}
-                {/*    </div>*/}
-                {/*</div>*/}
-            {/*        </SwiperSlide>*/}
-            {/*    ))}*/}
-
-            {/*    <div className={s.navigation}>*/}
-            {/*        <Button*/}
-            {/*            variant={"transparent"}*/}
-            {/*            disabled={currentSlideIndex === 0}*/}
-            {/*            onClick={() => goToSlide(currentSlideIndex - 1)}*/}
-            {/*        >*/}
-            {/*            Предыдущий участник*/}
-            {/*        </Button>*/}
-            {/*        <Button*/}
-            {/*            variant={"transparent"}*/}
-            {/*            disabled={currentSlideIndex === allRows.length - 1}*/}
-            {/*            onClick={() => goToSlide(currentSlideIndex + 1)}*/}
-            {/*        >*/}
-            {/*            Следующий участник*/}
-            {/*        </Button>*/}
-            {/*    </div>*/}
-            {/*</Swiper>*/}
         </div>
     )
 }

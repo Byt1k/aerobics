@@ -88,8 +88,7 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                     <TableRow
                         key={row.participant_id}
                         row={row}
-                        rowIndex={rowIndex}
-                        rows={rows}
+                        isCurrentParticipant={(rowIndex === 0 || rows[rowIndex - 1]?.confirmed) && !row.confirmed}
                         currentUser={currentUser}
                         showParticipant={showParticipant}
                         translationQueue={translationQueue}
@@ -100,14 +99,13 @@ export const CompetitionRatesTable: React.FC<Props> = ({
                         setIsReport={setIsReport}
                         setSelectedParticipant={setSelectedParticipant}
                         setParticipantOptionsPopup={setParticipantOptionsPopup}
-                        getParticipantPlace={getParticipantPlace}
                         setChangeRatePopup={setChangeRatePopup}
                         setSelectedChangingRate={setSelectedChangingRate}
                         setChangeDeductionsPopup={setChangeDeductionsPopup}
                         setSelectedChangingDeductions={setSelectedChangingDeductions}
-                    >
-
-                    </TableRow>
+                        prevNominationWithAgeGroup={`${rows[rowIndex - 1]?.participant.nomination} | ${rows[rowIndex - 1]?.participant.age_group}`}
+                        participantPlace={getParticipantPlace(row.participant.nomination_shortened, row.participant.id)}
+                    />
                 ))}
                 </tbody>
             </table>

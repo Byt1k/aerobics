@@ -75,7 +75,7 @@ export const useLeaderboard = (rows: RatingRow[]) => {
             let currentPlace = 1
             for (let i = 0; i < group.length; i++) {
                 if (i > 0 && !compareItemsEqual(group[i], group[i-1])) {
-                    currentPlace = i + 1
+                    currentPlace = currentPlace + 1
                 }
                 group[i].place = currentPlace
             }

@@ -17,8 +17,7 @@ import { SelectedChangingDeductions } from '@/entities/competition/ui/deductions
 export const TableRow: React.FC<TableRowProps> = React.memo(
 ({
     row,
-    rowIndex,
-    rows,
+    isCurrentParticipant,
     currentUser,
     showParticipant,
     translationQueue,
@@ -29,178 +28,169 @@ export const TableRow: React.FC<TableRowProps> = React.memo(
     setIsReport,
     setSelectedParticipant,
     setParticipantOptionsPopup,
-    getParticipantPlace,
     setChangeRatePopup,
     setSelectedChangingRate,
     setChangeDeductionsPopup,
     setSelectedChangingDeductions,
+    prevNominationWithAgeGroup,
+    participantPlace,
 }) => {
-        const nominationWithAgeGroup = `${row.participant.nomination} | ${row.participant.age_group}`
-        const prevNominationWithAgeGroup = `${rows[rowIndex - 1]?.participant.nomination} | ${rows[rowIndex - 1]?.participant.age_group}`
+    const nominationWithAgeGroup = `${row.participant.nomination} | ${row.participant.age_group}`
 
-        return (
-            <React.Fragment key={row.participant_id}>
-                {nominationWithAgeGroup !== prevNominationWithAgeGroup && (
-                    <tr>
-                        <td className="text-center font-bold" colSpan={20}>
-                            <div className="flex items-center justify-center gap-4">
-                                {nominationWithAgeGroup}
-                                {currentUser.is_admin && (
-                                    <button
-                                        onClick={() => {
-                                            setReportNominationWithAgeGroup(
-                                                nominationWithAgeGroup,
-                                            )
-                                            setIsReport(true)
-                                        }}
-                                    >
-                                        {svgIcons.download}
-                                    </button>
-                                )}
-                            </div>
-                        </td>
-                    </tr>
+    return (
+        <React.Fragment key={row.participant_id}>
+            {nominationWithAgeGroup !== prevNominationWithAgeGroup && (
+                <tr>
+                    <td className="text-center font-bold" colSpan={20}>
+                        <div className="flex items-center justify-center gap-4">
+                            {nominationWithAgeGroup}
+                            {currentUser.is_admin && (
+                                <button
+                                    onClick={() => {
+                                        setReportNominationWithAgeGroup(
+                                            nominationWithAgeGroup,
+                                        )
+                                        setIsReport(true)
+                                    }}
+                                >
+                                    {svgIcons.download}
+                                </button>
+                            )}
+                        </div>
+                    </td>
+                </tr>
+            )}
+            <tr
+                className={classNames(
+                    { [s.current]: isCurrentParticipant },
+                    { [s.confirmed]: row.confirmed },
+                    {
+                        [s.waiting]: translationQueue?.some(
+                            num => num === row.participant.order_num,
+                        ),
+                    },
+                    { [s.shown]: row.has_shown },
                 )}
-                <tr
-                    className={classNames(
-                        { [s.current]: !rowIndex && !row.confirmed },
-                        {
-                            [s.current]:
-                                rows[rowIndex - 1]?.confirmed && !row.confirmed,
-                        },
-                        { [s.confirmed]: row.confirmed },
-                        {
-                            [s.waiting]: translationQueue?.some(
-                                num => num === row.participant.order_num,
-                            ),
-                        },
-                        { [s.shown]: row.has_shown },
-                    )}
+            >
+                <td
+                    className={`max-w-[200px] ${showParticipant && !row.has_shown && row.confirmed && 'cursor-pointer'}`}
+                    onClick={
+                        showParticipant && !row.has_shown && row.confirmed
+                            ? () => {
+                                  setSelectedParticipant(row)
+                                  setParticipantOptionsPopup(true)
+                              }
+                            : undefined
+                    }
                 >
-                    <td
-                        className={`max-w-[200px] ${showParticipant && !row.has_shown && row.confirmed && 'cursor-pointer'}`}
-                        onClick={
-                            showParticipant && !row.has_shown && row.confirmed
-                                ? () => {
-                                      setSelectedParticipant(row)
-                                      setParticipantOptionsPopup(true)
-                                  }
-                                : undefined
-                        }
-                    >
-                        {row.participant.names}
-                    </td>
+                    {row.participant.names}
+                </td>
 
-                    {row.rates['исполнение'].map((rate, i) => (
-                        <MemoizedRateCeil
-                            key={`execution-${row.participant_id}-${i}`}
-                            rate={rate}
-                            refereeShortName={`И${i + 1}`}
-                            declinedRate={declinedRate}
-                            openPopupChangeRate={
-                                changeRate ? setChangeRatePopup : undefined
-                            }
-                            setSelectedRate={setSelectedChangingRate}
-                            participantId={row.participant_id}
-                        />
-                    ))}
-                    <td className="font-bold">
-                        {calculateTotalExecutionOrArtistry(
-                            row.rates['исполнение'],
-                        )?.toFixed(2)}
-                    </td>
-
-                    {row.rates['артистичность'].map((rate, i) => (
-                        <MemoizedRateCeil
-                            key={`artistry-${row.participant_id}-${i}`}
-                            rate={rate}
-                            refereeShortName={`А${i + 1}`}
-                            declinedRate={declinedRate}
-                            openPopupChangeRate={
-                                changeRate ? setChangeRatePopup : undefined
-                            }
-                            setSelectedRate={setSelectedChangingRate}
-                            participantId={row.participant_id}
-                        />
-                    ))}
-                    <td className="font-bold">
-                        {calculateTotalExecutionOrArtistry(
-                            row.rates['артистичность'],
-                        )?.toFixed(2)}
-                    </td>
-
+                {row.rates['исполнение'].map((rate, i) => (
                     <MemoizedRateCeil
-                        key={`difficulty-${row.participant_id}`}
-                        rate={row.rates['сложность'][0]}
-                        refereeShortName={'C1'}
+                        key={`execution-${row.participant_id}-${i}`}
+                        rate={rate}
+                        refereeShortName={`И${i + 1}`}
                         declinedRate={declinedRate}
                         openPopupChangeRate={
                             changeRate ? setChangeRatePopup : undefined
                         }
                         setSelectedRate={setSelectedChangingRate}
                         participantId={row.participant_id}
-                        isDifficulty
                     />
-                    <td>{row.rates['сложность'][0]?.rate}</td>
-                    <td className="font-bold">
-                        {row.rates['сложность'][0]?.rate
-                            ? row.rates['сложность'][0]?.rate / 2
-                            : null}
-                    </td>
+                ))}
+                <td className="font-bold">
+                    {calculateTotalExecutionOrArtistry(
+                        row.rates['исполнение'],
+                    )?.toFixed(2)}
+                </td>
 
-                    <MemoizedDeductionCeil
-                        key={`deduction-line-${row.participant_id}`}
-                        deduction={row.deduction_line}
-                        openPopupChangeDeductions={
-                            changeDeductions
-                                ? setChangeDeductionsPopup
-                                : undefined
+                {row.rates['артистичность'].map((rate, i) => (
+                    <MemoizedRateCeil
+                        key={`artistry-${row.participant_id}-${i}`}
+                        rate={rate}
+                        refereeShortName={`А${i + 1}`}
+                        declinedRate={declinedRate}
+                        openPopupChangeRate={
+                            changeRate ? setChangeRatePopup : undefined
                         }
-                        setSelectedDeductions={setSelectedChangingDeductions}
-                        row={row}
+                        setSelectedRate={setSelectedChangingRate}
+                        participantId={row.participant_id}
                     />
-                    <MemoizedDeductionCeil
-                        key={`deduction-element-${row.participant_id}`}
-                        deduction={row.deduction_element}
-                        openPopupChangeDeductions={
-                            changeDeductions
-                                ? setChangeDeductionsPopup
-                                : undefined
-                        }
-                        setSelectedDeductions={setSelectedChangingDeductions}
-                        row={row}
-                    />
-                    <MemoizedDeductionCeil
-                        key={`deduction-judge-${row.participant_id}`}
-                        deduction={row.deduction_judge}
-                        openPopupChangeDeductions={
-                            changeDeductions
-                                ? setChangeDeductionsPopup
-                                : undefined
-                        }
-                        setSelectedDeductions={setSelectedChangingDeductions}
-                        row={row}
-                    />
+                ))}
+                <td className="font-bold">
+                    {calculateTotalExecutionOrArtistry(
+                        row.rates['артистичность'],
+                    )?.toFixed(2)}
+                </td>
 
-                    <td className="font-bold">
-                        {calculateTotalDeductions(row)?.toFixed(2)}
-                    </td>
+                <MemoizedRateCeil
+                    key={`difficulty-${row.participant_id}`}
+                    rate={row.rates['сложность'][0]}
+                    refereeShortName={'C1'}
+                    declinedRate={declinedRate}
+                    openPopupChangeRate={
+                        changeRate ? setChangeRatePopup : undefined
+                    }
+                    setSelectedRate={setSelectedChangingRate}
+                    participantId={row.participant_id}
+                    isDifficulty
+                />
+                <td>{row.rates['сложность'][0]?.rate}</td>
+                <td className="font-bold">
+                    {row.rates['сложность'][0]?.rate
+                        ? row.rates['сложность'][0]?.rate / 2
+                        : null}
+                </td>
 
-                    <td className="font-bold">
-                        {calculateTotalRate(row)?.toFixed(2)}
-                    </td>
-                    <td className="font-bold">
-                        {getParticipantPlace(
-                            row.participant.nomination_shortened,
-                            row.participant.id,
-                        )}
-                    </td>
-                </tr>
-            </React.Fragment>
-        )
-    },
-    arePropsEqual,
-)
+                <MemoizedDeductionCeil
+                    key={`deduction-line-${row.participant_id}`}
+                    deduction={row.deduction_line}
+                    openPopupChangeDeductions={
+                        changeDeductions
+                            ? setChangeDeductionsPopup
+                            : undefined
+                    }
+                    setSelectedDeductions={setSelectedChangingDeductions}
+                    row={row}
+                />
+                <MemoizedDeductionCeil
+                    key={`deduction-element-${row.participant_id}`}
+                    deduction={row.deduction_element}
+                    openPopupChangeDeductions={
+                        changeDeductions
+                            ? setChangeDeductionsPopup
+                            : undefined
+                    }
+                    setSelectedDeductions={setSelectedChangingDeductions}
+                    row={row}
+                />
+                <MemoizedDeductionCeil
+                    key={`deduction-judge-${row.participant_id}`}
+                    deduction={row.deduction_judge}
+                    openPopupChangeDeductions={
+                        changeDeductions
+                            ? setChangeDeductionsPopup
+                            : undefined
+                    }
+                    setSelectedDeductions={setSelectedChangingDeductions}
+                    row={row}
+                />
+
+                <td className="font-bold">
+                    {calculateTotalDeductions(row)?.toFixed(2)}
+                </td>
+
+                <td className="font-bold">
+                    {calculateTotalRate(row)?.toFixed(2)}
+                </td>
+                <td className="font-bold">
+                    {participantPlace}
+                </td>
+            </tr>
+        </React.Fragment>
+    )
+}, arePropsEqual)
 
 // Функция для сравнения пропсов
 function arePropsEqual(prevProps: TableRowProps, nextProps: TableRowProps) {
@@ -215,14 +205,16 @@ function arePropsEqual(prevProps: TableRowProps, nextProps: TableRowProps) {
         prevProps.row.confirmed === nextProps.row.confirmed &&
         prevProps.row.has_shown === nextProps.row.has_shown &&
         JSON.stringify(prevProps.translationQueue) ===
-            JSON.stringify(nextProps.translationQueue)
+            JSON.stringify(nextProps.translationQueue) &&
+        prevProps.prevNominationWithAgeGroup === nextProps.prevNominationWithAgeGroup &&
+        prevProps.participantPlace === nextProps.participantPlace &&
+        prevProps.isCurrentParticipant === nextProps.isCurrentParticipant
     )
 }
 
 interface TableRowProps {
     row: RatingRow
-    rowIndex: number
-    rows: RatingRow[]
+    isCurrentParticipant: boolean
     currentUser: any
     showParticipant?: (participantOrderNum: number) => void
     translationQueue: number[]
@@ -233,14 +225,12 @@ interface TableRowProps {
     setIsReport: (v: boolean) => void
     setSelectedParticipant: (v: RatingRow) => void
     setParticipantOptionsPopup: (v: boolean) => void
-    getParticipantPlace: (
-        nomination: string,
-        participantId: number,
-    ) => number | undefined
     setChangeRatePopup: React.Dispatch<React.SetStateAction<boolean>>
     setSelectedChangingRate: React.Dispatch<SelectedChangingRate | undefined>
     setChangeDeductionsPopup: React.Dispatch<React.SetStateAction<boolean>>
     setSelectedChangingDeductions: React.Dispatch<React.SetStateAction<SelectedChangingDeductions | undefined>>
+    prevNominationWithAgeGroup: string
+    participantPlace: number | undefined
 }
 
 // Мемоизированные компоненты ячеек
