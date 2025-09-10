@@ -9,23 +9,27 @@ interface RateCeilProps {
     declinedRate?: (userId: number) => void
     participantId: number
     openPopupChangeRate?: (v: boolean) => void
-    setSelectedRate: (v: SelectedChangingRate) => void
+    setSelectedRate?: (v: SelectedChangingRate) => void
     isDifficulty?: boolean
+    notNullable?: boolean
 }
 
 export const RateCeil: React.FC<RateCeilProps> = ({
-  rate,
-  openPopupChangeRate,
-  setSelectedRate,
-  declinedRate,
-  refereeShortName,
-  participantId,
-  isDifficulty,
+    rate,
+    openPopupChangeRate,
+    setSelectedRate,
+    declinedRate,
+    refereeShortName,
+    participantId,
+    isDifficulty,
+    notNullable,
 }) => {
     const select = () => {
-        setSelectedRate({
+        if (!rate) return
+
+        setSelectedRate?.({
             refereeShortName: refereeShortName,
-            rate: rate!,
+            rate: rate,
             participantId: participantId,
             isDifficulty,
         })
@@ -50,6 +54,8 @@ export const RateCeil: React.FC<RateCeilProps> = ({
             )}
 
             {!declinedRate && !openPopupChangeRate && rate && rate.rate}
+
+            {!rate && notNullable && "0"}
         </td>
     )
 }

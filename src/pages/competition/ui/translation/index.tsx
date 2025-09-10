@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Competition } from '@/entities/competition'
 import { RatingRow, RatingRowsByBrigades, useWebSocket, WebSocketError } from '@/kernel/ws'
 import { toast } from 'react-toastify'
@@ -25,6 +25,8 @@ export const Translation: React.FC<IProps> = ({ competition }) => {
         const payload = {
             remove_number_translation: participantOrderNum,
         }
+
+        return
 
         ws?.send(JSON.stringify(payload))
     }, [ws])
@@ -88,6 +90,17 @@ export const Translation: React.FC<IProps> = ({ competition }) => {
 
     const { getParticipantPlace } = useLeaderboard(confirmedParticipants)
 
+    // фиксация места участника на время показа
+    const currentParticipantPlace = useMemo(() => {
+        if (!currentParticipant) return
+
+        return getParticipantPlace(
+            currentParticipant.participant.nomination_shortened,
+            currentParticipant.participant.id,
+        )
+        // eslint-disable-next-line
+    }, [currentParticipant?.participant.id])
+
     if (!currentParticipant) return
 
     return (
@@ -99,21 +112,40 @@ export const Translation: React.FC<IProps> = ({ competition }) => {
                     <h2 className="mt-2">{currentParticipant.participant.nomination_shortened}</h2>
                 </div>
             </div>
-            <div className={s.result}>
-                <div className={s.rates}>
-                    <p>И: <b>{calculateTotalExecutionOrArtistry(currentParticipant.rates['исполнение'])?.toFixed(2)}</b></p>
-                    <p>А: <b>{calculateTotalExecutionOrArtistry(currentParticipant.rates['артистичность'])?.toFixed(2)}</b></p>
-                    {currentParticipant.rates['сложность'][0]?.rate && <p>С: <b>{(currentParticipant.rates['сложность'][0]?.rate / 2).toFixed(2)}</b></p>}
-                    <p>Сб: <b>{calculateTotalDeductions(currentParticipant)?.toFixed(2)}</b></p>
-                    <h1>Итоговая оценка: {calculateTotalRate(currentParticipant)?.toFixed(2)}</h1>
-                </div>
-                <div className={s.place}>
-                    <h2>Место</h2>
-                    <p>
-                        {getParticipantPlace(currentParticipant.participant.nomination_shortened, currentParticipant.participant.id)}
-                    </p>
-                </div>
-            </div>
+            <table className={s.table}>
+                <tr>
+                    <td>
+                        <p>Исп</p>
+                        <b>{calculateTotalExecutionOrArtistry(currentParticipant.rates['исполнение'])?.toFixed(2)}</b>
+                    </td>
+                    <td>
+                        <p>Арт</p>
+                        <b>{calculateTotalExecutionOrArtistry(currentParticipant.rates['артистичность'])?.toFixed(2)}</b>
+                    </td>
+                    <td>
+                        <p>Сл</p>
+                        <b>{(currentParticipant.rates['сложность'][0]?.rate ?? 0 / 2).toFixed(2)}</b>
+                    </td>
+                    <td>
+                        <p>Сб</p>
+                        <b>{calculateTotalDeductions(currentParticipant)?.toFixed(2)}</b>
+                    </td>
+                    <td rowSpan={2} className={s.place}>
+                        <h2>Место</h2>
+                        <p>
+                            {currentParticipantPlace}
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td colSpan={4}>
+                        <div className={s.total}>
+                            <h2>Итоговая оценка:</h2>
+                            <h1>{calculateTotalRate(currentParticipant)?.toFixed(2)}</h1>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
     )
 }

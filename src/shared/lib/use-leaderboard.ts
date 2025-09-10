@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { calculateTotalExecutionOrArtistry, calculateTotalRate } from '@/shared/lib/calculateTotalRate'
 import { RatingRow } from '@/kernel/ws'
 
@@ -75,7 +75,7 @@ export const useLeaderboard = (rows: RatingRow[]) => {
             let currentPlace = 1
             for (let i = 0; i < group.length; i++) {
                 if (i > 0 && !compareItemsEqual(group[i], group[i-1])) {
-                    currentPlace = currentPlace + 1
+                    currentPlace = i + 1
                 }
                 group[i].place = currentPlace
             }
@@ -84,11 +84,11 @@ export const useLeaderboard = (rows: RatingRow[]) => {
         setLeaderboard(list)
     }, [rows])
 
-    const getParticipantPlace = (shortNomination: string, participantId: number) => {
+    const getParticipantPlace = useCallback((shortNomination: string, participantId: number) => {
         return leaderboard[shortNomination]
             ?.find(item => participantId === item.participantId)
             ?.place
-    }
+    }, [leaderboard])
 
     return { getParticipantPlace }
 }

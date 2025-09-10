@@ -69,7 +69,7 @@ export const TableRow: React.FC<TableRowProps> = React.memo(
                             num => num === row.participant.order_num,
                         ),
                     },
-                    { [s.shown]: row.has_shown },
+                    { [s.shown]: row.has_shown || translationQueue[0] === row.participant.order_num },
                 )}
             >
                 <td
@@ -135,12 +135,20 @@ export const TableRow: React.FC<TableRowProps> = React.memo(
                     setSelectedRate={setSelectedChangingRate}
                     participantId={row.participant_id}
                     isDifficulty
+                    notNullable={row.confirmed}
                 />
-                <td>{row.rates['сложность'][0]?.rate}</td>
+                <MemoizedRateCeil
+                    rate={row.rates['сложность'][0]}
+                    refereeShortName={'C2'}
+                    participantId={row.participant_id}
+                    isDifficulty
+                    notNullable={row.confirmed}
+                />
+
                 <td className="font-bold">
                     {row.rates['сложность'][0]?.rate
                         ? row.rates['сложность'][0]?.rate / 2
-                        : null}
+                        : row.confirmed ? 0 : null}
                 </td>
 
                 <MemoizedDeductionCeil
@@ -238,7 +246,8 @@ const MemoizedRateCeil = React.memo(RateCeil, (prevProps, nextProps) => {
     return (
         prevProps.rate?.rate === nextProps.rate?.rate &&
         prevProps.rate?.user_id === nextProps.rate?.user_id &&
-        prevProps.participantId === nextProps.participantId
+        prevProps.participantId === nextProps.participantId &&
+        prevProps.notNullable === nextProps.notNullable
     )
 })
 
