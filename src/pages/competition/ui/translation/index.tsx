@@ -26,8 +26,6 @@ export const Translation: React.FC<IProps> = ({ competition }) => {
             remove_number_translation: participantOrderNum,
         }
 
-        return
-
         ws?.send(JSON.stringify(payload))
     }, [ws])
 
