@@ -73,9 +73,9 @@ export const TableRow: React.FC<TableRowProps> = React.memo(
                 )}
             >
                 <td
-                    className={`max-w-[200px] ${showParticipant && !row.has_shown && row.confirmed && 'cursor-pointer'}`}
+                    className={`max-w-[200px] ${showParticipant && !row.has_shown && translationQueue[0] !== row.participant.order_num && row.confirmed && 'cursor-pointer'}`}
                     onClick={
-                        showParticipant && !row.has_shown && row.confirmed
+                        showParticipant && !row.has_shown && translationQueue[0] !== row.participant.order_num  && row.confirmed
                             ? () => {
                                   setSelectedParticipant(row)
                                   setParticipantOptionsPopup(true)
