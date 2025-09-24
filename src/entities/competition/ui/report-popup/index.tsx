@@ -30,7 +30,7 @@ export const CompetitionReportPopup: React.FC<Props> = ({ active, setActive, onC
                     ...formState,
                     competition_id: competitionId,
                     nomination: nomination,
-                    age_group: encodeURIComponent(ageGroup),
+                    age_group: ageGroup ? encodeURIComponent(ageGroup) : undefined,
                 })
 
                 const savedData = localStorage.getItem('competitionReportData')
